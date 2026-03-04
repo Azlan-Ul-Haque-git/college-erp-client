@@ -1,155 +1,172 @@
-import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import Webcam from "react-webcam";
-import api from "../../utils/axiosInstance";
-import toast from "react-hot-toast";
-import { CameraIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { useState, useEffect } from "react";
+import axios from "../../utils/axiosInstance";
+
+const SUBJECTS = ["Mathematics", "Physics", "Chemistry", "Computer Science", "English"];
 
 export default function MarkAttendance() {
-  const [students, setStudents] = useState([]);
-  const [attendance, setAttendance] = useState({});
-  const [form, setForm] = useState({ branch:"CSE", year:"2", semester:"3", section:"A", subject:"" });
+  const [subject, setSubject] = useState(SUBJECTS[0]);
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [pending, setPending] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [faceMode, setFaceMode] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const webcamRef = useRef(null);
+  const [facultyCheckin, setFacultyCheckin] = useState(false);
+  const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    if (!form.branch || !form.year) return;
-    api.get(`/students?branch=${form.branch}&year=${form.year}&section=${form.section}`)
-      .then(r => {
-        const list = r.data.students || [];
-        setStudents(list);
-        const init = {};
-        list.forEach(s => init[s._id] = "Present");
-        setAttendance(init);
-      }).catch(() => {});
-  }, [form.branch, form.year, form.section]);
-
-  const toggle = (id) => {
-    setAttendance(p => ({...p, [id]: p[id]==="Present" ? "Absent" : "Present"}));
-  };
-
-  const captureAndRecognize = async () => {
-    const img = webcamRef.current?.getScreenshot();
-    if (!img) { toast.error("Camera not ready"); return; }
+  const fetchPending = async () => {
     setLoading(true);
     try {
-      const { data } = await api.post("/attendance/face-recognize", { image: img, studentIds: students.map(s=>s._id) });
-      if (data.recognizedId) {
-        setAttendance(p => ({...p, [data.recognizedId]: "Present"}));
-        toast.success(`Face recognized: ${data.name}`);
-      } else { toast.error("Face not recognized"); }
-    } catch { toast.error("Recognition failed"); }
-    finally { setLoading(false); }
+      const { data } = await axios.get(`/attendance/pending?subject=${subject}&date=${date}`);
+      setPending(data.data);
+    } catch (err) { }
+    setLoading(false);
   };
 
-  const handleSubmit = async () => {
-    if (!form.subject) { toast.error("Please enter subject"); return; }
-    setSubmitting(true);
+  const verifyAttendance = async (id, status) => {
     try {
-      const records = students.map(s => ({ student: s._id, status: attendance[s._id] || "Absent", subject: form.subject, date: new Date(), markedBy: faceMode?"face":"manual" }));
-      await api.post("/attendance/bulk", { records });
-      toast.success("Attendance submitted!");
-    } catch (err) { toast.error(err.response?.data?.message || "Failed"); }
-    finally { setSubmitting(false); }
+      await axios.put(`/attendance/verify/${id}`, { status });
+      setPending((prev) => prev.filter((p) => p._id !== id));
+      setMessage(`✅ ${status === "present" ? "Present" : "Absent"} mark ho gaya!`);
+      setTimeout(() => setMessage(""), 2000);
+    } catch (err) {
+      setMessage("Error aaya!");
+    }
   };
 
-  const presentCount = Object.values(attendance).filter(v=>v==="Present").length;
+  const markFacultyAttendance = async () => {
+    if (!navigator.geolocation) return setMessage("GPS nahi hai!");
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const { data } = await axios.post("/attendance/faculty-checkin", {
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        });
+        setFacultyCheckin(true);
+        setMessage(data.message);
+      } catch (err) {
+        setMessage(err.response?.data?.message || "Error!");
+      }
+    }, () => setMessage("Location allow karo!"), { enableHighAccuracy: true });
+  };
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Mark Attendance</h1>
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">✅ Attendance Verify Karo</h1>
 
-      {/* Filters */}
-      <div className="card grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {[
-          { label:"Branch", name:"branch", options:["CSE","IT","ECE","EE","ME"] },
-          { label:"Year",   name:"year",   options:["1","2","3","4"] },
-          { label:"Sem",    name:"semester",options:["1","2","3","4","5","6","7","8"] },
-          { label:"Section",name:"section",options:["A","B","C","D"] },
-        ].map(f => (
-          <div key={f.name}>
-            <label className="text-xs font-medium text-slate-500 mb-1 block">{f.label}</label>
-            <select value={form[f.name]} onChange={e=>setForm(p=>({...p,[f.name]:e.target.value}))} className="input">
-              {f.options.map(o=><option key={o}>{o}</option>)}
+      {/* Faculty own attendance */}
+      <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-5 mb-6 text-white">
+        <h2 className="font-bold text-lg mb-2">Meri Apni Attendance</h2>
+        <p className="text-sm opacity-80 mb-3">Aaj college aa gaye ho? Location se verify karo!</p>
+        {!facultyCheckin ? (
+          <button onClick={markFacultyAttendance} className="bg-white text-purple-700 px-5 py-2 rounded-xl font-bold">
+            📍 Meri Attendance Mark Karo
+          </button>
+        ) : (
+          <div className="bg-green-400/30 px-4 py-2 rounded-xl inline-block font-bold">
+            ✅ Aaj ki attendance ho gayi!
+          </div>
+        )}
+      </div>
+
+      {message && (
+        <div className="bg-green-50 text-green-700 p-3 rounded-lg mb-4 text-sm">{message}</div>
+      )}
+
+      {/* Filter */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6">
+        <div className="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subject</label>
+            <select
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:text-white"
+            >
+              {SUBJECTS.map((s) => <option key={s}>{s}</option>)}
             </select>
           </div>
-        ))}
-        <div>
-          <label className="text-xs font-medium text-slate-500 mb-1 block">Subject *</label>
-          <input value={form.subject} onChange={e=>setForm(p=>({...p,subject:e.target.value}))} className="input" placeholder="e.g. DBMS" />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:text-white"
+            />
+          </div>
         </div>
-      </div>
-
-      {/* Face Mode Toggle */}
-      <div className="flex items-center gap-4">
-        <button onClick={() => setFaceMode(f=>!f)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition ${faceMode ? "bg-purple-600 text-white" : "btn-secondary"}`}>
-          <CameraIcon className="w-4 h-4" /> {faceMode ? "Face Mode ON" : "Enable Face Mode"}
+        <button
+          onClick={fetchPending}
+          className="w-full bg-purple-600 text-white py-2 rounded-xl font-semibold"
+        >
+          🔍 Students Dekho
         </button>
-        <div className="text-sm text-slate-600 dark:text-slate-400">
-          Present: <span className="font-bold text-emerald-600">{presentCount}</span> / {students.length}
-        </div>
       </div>
 
-      {/* Webcam */}
-      {faceMode && (
-        <motion.div initial={{opacity:0,height:0}} animate={{opacity:1,height:"auto"}} className="card">
-          <h3 className="font-semibold text-slate-800 dark:text-white mb-3">Face Recognition Attendance</h3>
-          <div className="flex flex-col sm:flex-row gap-4 items-start">
-            <Webcam ref={webcamRef} screenshotFormat="image/jpeg" className="rounded-xl w-full sm:w-72 h-48 object-cover" />
-            <div className="space-y-3">
-              <p className="text-sm text-slate-600 dark:text-slate-400">Point camera at student's face and click capture to auto-mark attendance.</p>
-              <motion.button whileTap={{scale:0.95}} onClick={captureAndRecognize} disabled={loading}
-                className="btn-primary flex items-center gap-2">
-                <CameraIcon className="w-4 h-4" /> {loading ? "Recognizing..." : "Capture & Recognize"}
-              </motion.button>
-            </div>
-          </div>
-        </motion.div>
-      )}
+      {/* Pending List */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
+        <h2 className="text-lg font-semibold mb-4 dark:text-white">
+          Pending Verification ({pending.length})
+        </h2>
 
-      {/* Student list */}
-      <div className="card p-0 overflow-hidden">
-        <div className="p-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
-          <h3 className="font-semibold text-slate-800 dark:text-white">Students ({students.length})</h3>
-          <div className="flex gap-2">
-            <button onClick={() => { const all={}; students.forEach(s=>all[s._id]="Present"); setAttendance(all); }} className="text-xs text-emerald-600 hover:underline">All Present</button>
-            <span className="text-slate-300">|</span>
-            <button onClick={() => { const all={}; students.forEach(s=>all[s._id]="Absent"); setAttendance(all); }} className="text-xs text-red-500 hover:underline">All Absent</button>
-          </div>
-        </div>
-        <div className="divide-y divide-slate-100 dark:divide-slate-700">
-          {students.length === 0 ? (
-            <p className="text-center py-8 text-slate-400 text-sm">Select filters to load students</p>
-          ) : students.map((s,i) => (
-            <motion.div key={s._id} initial={{opacity:0}} animate={{opacity:1}} transition={{delay:i*0.02}}
-              className="flex items-center justify-between px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                  {s.user?.name?.[0]}
-                </div>
-                <div>
-                  <p className="font-medium text-sm text-slate-700 dark:text-slate-200">{s.user?.name}</p>
-                  <p className="text-xs text-slate-400">{s.rollNo}</p>
+        {loading ? (
+          <p className="text-center text-gray-400 py-8">Loading...</p>
+        ) : pending.length === 0 ? (
+          <p className="text-center text-gray-400 py-8">Koi pending nahi hai! 🎉</p>
+        ) : (
+          <div className="space-y-4">
+            {pending.map((p) => (
+              <div key={p._id} className="border dark:border-gray-600 rounded-xl p-4">
+                <div className="flex items-start gap-4">
+                  {/* Selfie */}
+                  {p.selfie ? (
+                    <img
+                      src={p.selfie}
+                      alt="selfie"
+                      className="w-20 h-20 object-cover rounded-xl border-2 border-purple-200"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 bg-gray-200 rounded-xl flex items-center justify-center text-3xl">
+                      👤
+                    </div>
+                  )}
+
+                  {/* Info */}
+                  <div className="flex-1">
+                    <p className="font-bold dark:text-white">
+                      {p.student?.user?.name || "Student"}
+                    </p>
+                    <p className="text-sm text-gray-500">{p.student?.user?.email}</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Roll No: {p.student?.rollNumber} | Branch: {p.student?.branch}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      ⏰ {p.checkinTime ? new Date(p.checkinTime).toLocaleTimeString() : "N/A"}
+                    </p>
+                    <p className="text-xs text-green-600">
+                      📍 {p.latitude?.toFixed(4)}, {p.longitude?.toFixed(4)}
+                    </p>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => verifyAttendance(p._id, "present")}
+                      className="bg-green-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-600"
+                    >
+                      ✅ Present
+                    </button>
+                    <button
+                      onClick={() => verifyAttendance(p._id, "absent")}
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-600"
+                    >
+                      ❌ Absent
+                    </button>
+                  </div>
                 </div>
               </div>
-              <button onClick={() => toggle(s._id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${attendance[s._id]==="Present" ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400" : "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"}`}>
-                {attendance[s._id]==="Present" && <CheckIcon className="w-3 h-3" />}
-                {attendance[s._id] || "Absent"}
-              </button>
-            </motion.div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      {students.length > 0 && (
-        <motion.button whileTap={{scale:0.98}} onClick={handleSubmit} disabled={submitting} className="btn-primary w-full py-3 text-base">
-          {submitting ? "Submitting..." : "Submit Attendance"}
-        </motion.button>
-      )}
     </div>
   );
 }
