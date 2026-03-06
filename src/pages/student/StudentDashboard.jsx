@@ -11,8 +11,9 @@ import api from "../../utils/axiosInstance";
 import ViewAttendance from "./ViewAttendance";
 import ViewMarks from "./ViewMarks";
 import ViewFees from "./ViewFees";
+Studentattendance.jsx
 import AIPrediction from "./AIPrediction";
-import StudentAttendance from "./StudentAttendance";
+
 
 // ─── Student Timetable ───────────────────────────────────────────────────────
 function StudentTimetable() {
