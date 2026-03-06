@@ -33,13 +33,18 @@ jobs:
           VITE_RAZORPAY_KEY_ID: rzp_live_SN231JB1uxCoR7
 
       - name: Install Capacitor
-        run: npm install @capacitor/core @capacitor/cli @capacitor/android
+        run: npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest
 
       - name: Init Capacitor
         run: npx cap init "College ERP" "com.college.erp" --web-dir=dist
 
       - name: Add Android
         run: npx cap add android
+
+      - name: Update Gradle wrapper
+        run: |
+          cd android
+          sed -i 's|gradle-8.2.1-all.zip|gradle-8.7-all.zip|g' gradle/wrapper/gradle-wrapper.properties
 
       - name: Sync Capacitor
         run: npx cap sync android
@@ -48,7 +53,7 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
