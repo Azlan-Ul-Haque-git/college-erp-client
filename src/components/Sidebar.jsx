@@ -11,38 +11,38 @@ import { useState } from "react";
 
 const MENUS = {
   admin: [
-    { label: "Dashboard",  path: "/admin/dashboard",  icon: HomeIcon },
-    { label: "Students",   path: "/admin/students",   icon: AcademicCapIcon },
-    { label: "Faculty",    path: "/admin/faculty",    icon: UsersIcon },
+    { label: "Dashboard", path: "/admin/dashboard", icon: HomeIcon },
+    { label: "Students", path: "/admin/students", icon: AcademicCapIcon },
+    { label: "Faculty", path: "/admin/faculty", icon: UsersIcon },
     { label: "Attendance", path: "/admin/attendance", icon: ClipboardDocumentListIcon },
-    { label: "Marks",      path: "/admin/marks",      icon: ChartBarIcon },
-    { label: "Fees",       path: "/admin/fees",       icon: BanknotesIcon },
-    { label: "Notices",    path: "/admin/notices",    icon: BellIcon },
-    { label: "Timetable",  path: "/admin/timetable",  icon: CalendarIcon },
-    { label: "Reports",    path: "/admin/reports",    icon: ChartBarIcon },
+    { label: "Marks", path: "/admin/marks", icon: ChartBarIcon },
+    { label: "Fees", path: "/admin/fees", icon: BanknotesIcon },
+    { label: "Notices", path: "/admin/notices", icon: BellIcon },
+    { label: "Timetable", path: "/admin/timetable", icon: CalendarIcon },
+    { label: "Reports", path: "/admin/reports", icon: ChartBarIcon },
   ],
   faculty: [
-    { label: "Dashboard",  path: "/faculty/dashboard",  icon: HomeIcon },
-    { label: "Attendance", path: "/faculty/attendance",  icon: ClipboardDocumentListIcon },
-    { label: "Marks",      path: "/faculty/marks",      icon: ChartBarIcon },
-    { label: "Timetable",  path: "/faculty/timetable",  icon: CalendarIcon },
-    { label: "Notices",    path: "/faculty/notices",    icon: BellIcon },
-    { label: "Chat",       path: "/faculty/chat",       icon: ChatBubbleLeftRightIcon },
+    { label: "Dashboard", path: "/faculty/dashboard", icon: HomeIcon },
+    { label: "Attendance", path: "/faculty/attendance", icon: ClipboardDocumentListIcon },
+    { label: "Marks", path: "/faculty/marks", icon: ChartBarIcon },
+    { label: "Timetable", path: "/faculty/timetable", icon: CalendarIcon },
+    { label: "Notices", path: "/faculty/notices", icon: BellIcon },
+    { label: "Chat", path: "/faculty/chat", icon: ChatBubbleLeftRightIcon },
   ],
   student: [
-    { label: "Dashboard",  path: "/student/dashboard",  icon: HomeIcon },
+    { label: "Dashboard", path: "/student/dashboard", icon: HomeIcon },
     { label: "Attendance", path: "/student/attendance", icon: ClipboardDocumentListIcon },
-    { label: "Marks",      path: "/student/marks",      icon: ChartBarIcon },
-    { label: "Fees",       path: "/student/fees",       icon: BanknotesIcon },
-    { label: "Timetable",  path: "/student/timetable",  icon: CalendarIcon },
-    { label: "Notices",    path: "/student/notices",    icon: BellIcon },
-    { label: "AI Report",  path: "/student/ai",         icon: ChartBarIcon },
-    { label: "Chat",       path: "/student/chat",       icon: ChatBubbleLeftRightIcon },
+    { label: "Marks", path: "/student/marks", icon: ChartBarIcon },
+    { label: "Fees", path: "/student/fees", icon: BanknotesIcon },
+    { label: "Timetable", path: "/student/timetable", icon: CalendarIcon },
+    { label: "Notices", path: "/student/notices", icon: BellIcon },
+    { label: "AI Report", path: "/student/ai", icon: ChartBarIcon },
+    { label: "Chat", path: "/student/chat", icon: ChatBubbleLeftRightIcon },
   ],
 };
 
 const ROLE_COLORS = {
-  admin:   "from-violet-500 to-purple-600",
+  admin: "from-violet-500 to-purple-600",
   faculty: "from-blue-500 to-cyan-600",
   student: "from-emerald-500 to-teal-600",
 };
@@ -71,10 +71,9 @@ export default function Sidebar() {
         {menu.map(item => (
           <NavLink key={item.path} to={item.path} onClick={() => setOpen(false)}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
-                isActive
-                  ? `bg-gradient-to-r ${color} text-white shadow-lg`
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
+              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
+                ? `bg-gradient-to-r ${color} text-white shadow-lg`
+                : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
               }`}>
             <item.icon className="w-5 h-5 flex-shrink-0" />
             {item.label}
@@ -102,9 +101,9 @@ export default function Sidebar() {
       <AnimatePresence>
         {open && (
           <>
-            <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setOpen(false)} className="lg:hidden fixed inset-0 bg-black/50 z-40" />
-            <motion.div initial={{ x:-280 }} animate={{ x:0 }} exit={{ x:-280 }} transition={{ type:"spring", damping:25 }}
+            <motion.div initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }} transition={{ type: "spring", damping: 25 }}
               className="lg:hidden fixed left-0 top-0 h-full w-64 bg-white dark:bg-slate-800 z-50 shadow-2xl">
               <button onClick={() => setOpen(false)} className="absolute top-3 right-3 p-1 text-slate-500">
                 <XMarkIcon className="w-5 h-5" />

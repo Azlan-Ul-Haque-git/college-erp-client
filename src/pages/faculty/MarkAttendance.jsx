@@ -1,14 +1,30 @@
+
 import { useState, useEffect } from "react";
 import axios from "../../utils/axiosInstance";
-
+import * as faceapi from "face-api.js";
 const SUBJECTS = ["Mathematics", "Physics", "Chemistry", "Computer Science", "English"];
 
 export default function MarkAttendance() {
+
+  useEffect(() => {
+    const loadModels = async () => {
+      const MODEL_URL = "/models";
+
+      await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
+      await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+      await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+
+      console.log("Face models loaded");
+    };
+
+    loadModels();
+  }, []);
   const [subject, setSubject] = useState(SUBJECTS[0]);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [pending, setPending] = useState([]);
   const [loading, setLoading] = useState(false);
   const [facultyCheckin, setFacultyCheckin] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [message, setMessage] = useState("");
 
   const fetchPending = async () => {
@@ -18,6 +34,45 @@ export default function MarkAttendance() {
       setPending(data.data);
     } catch (err) { }
     setLoading(false);
+  };
+  const verifyFace = async (selfie, studentPhoto) => {
+    try {
+
+      const img1 = await faceapi.fetchImage(selfie);
+      const img2 = await faceapi.fetchImage(studentPhoto);
+
+      if (!img1 || !img2) {
+        alert("Image load nahi hui!");
+        return false;
+      }
+
+
+      const d1 = await faceapi
+        .detectSingleFace(img1)
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+
+      const d2 = await faceapi
+        .detectSingleFace(img2)
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+
+      if (!d1 || !d2) {
+        alert("Face detect nahi hua!");
+        return false;
+      }
+
+      const distance = faceapi.euclideanDistance(
+        d1.descriptor,
+        d2.descriptor
+      );
+
+      return distance < 0.5;
+
+    } catch (err) {
+      console.log(err);
+      return false;
+    }
   };
 
   const verifyAttendance = async (id, status) => {
@@ -149,7 +204,31 @@ export default function MarkAttendance() {
                   {/* Actions */}
                   <div className="flex flex-col gap-2">
                     <button
-                      onClick={() => verifyAttendance(p._id, "present")}
+                      onClick={async () => {
+
+                        if (verifying) return;
+
+                        setVerifying(true);
+
+                        const studentPhoto = p.student?.user?.photo;
+
+                        if (!studentPhoto) {
+                          alert("Student profile photo nahi hai!");
+                          setVerifying(false);
+                          return;
+                        }
+
+                        const matched = await verifyFace(p.selfie, studentPhoto);
+
+                        if (matched) {
+                          verifyAttendance(p._id, "present");
+                        } else {
+                          alert("❌ Face match nahi hua!");
+                        }
+
+                        setVerifying(false);
+
+                      }}
                       className="bg-green-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-600"
                     >
                       ✅ Present

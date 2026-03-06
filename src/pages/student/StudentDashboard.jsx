@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Layout from "../../components/Layout";
@@ -11,6 +12,7 @@ import ViewAttendance from "./ViewAttendance";
 import ViewMarks from "./ViewMarks";
 import ViewFees from "./ViewFees";
 import AIPrediction from "./AIPrediction";
+import StudentAttendance from "./StudentAttendance";
 
 // ─── Student Timetable ───────────────────────────────────────────────────────
 function StudentTimetable() {
@@ -182,8 +184,8 @@ function StudentChat() {
           ) : users.map(u => (
             <div key={u._id} onClick={() => openChat(u)}
               className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer mb-1 transition ${selected?._id === u._id
-                  ? "bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700"
-                  : "hover:bg-slate-50 dark:hover:bg-slate-700"
+                ? "bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700"
+                : "hover:bg-slate-50 dark:hover:bg-slate-700"
                 }`}>
               <div className="w-9 h-9 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center font-bold text-white text-sm flex-shrink-0">
                 {u.name?.[0]?.toUpperCase()}
@@ -216,8 +218,8 @@ function StudentChat() {
                 ) : messages.map((m, i) => (
                   <div key={i} className={`flex ${m.sender?._id === user?._id ? "justify-end" : "justify-start"}`}>
                     <div className={`px-3 py-2 rounded-2xl text-sm max-w-xs break-words ${m.sender?._id === user?._id
-                        ? "bg-purple-600 text-white rounded-br-sm"
-                        : "bg-slate-100 dark:bg-slate-700 dark:text-white rounded-bl-sm"
+                      ? "bg-purple-600 text-white rounded-br-sm"
+                      : "bg-slate-100 dark:bg-slate-700 dark:text-white rounded-bl-sm"
                       }`}>
                       {m.content}
                     </div>
@@ -290,6 +292,12 @@ function StudentHome() {
           Welcome, {user?.name?.split(" ")[0]}! 👋
         </h1>
         <p className="text-slate-500 text-sm mt-1">Here's your academic overview.</p>
+        <Link
+          to="/student/mark-attendance"
+          className="inline-block mt-3 bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700"
+        >
+          📍 Mark Attendance
+        </Link>
       </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -363,6 +371,8 @@ export default function StudentDashboard() {
       <Routes>
         <Route path="dashboard" element={<StudentHome />} />
         <Route path="attendance" element={<ViewAttendance />} />
+        <Route path="mark-attendance" element={<StudentAttendance />} />
+
         <Route path="marks" element={<ViewMarks />} />
         <Route path="fees" element={<ViewFees />} />
         <Route path="timetable" element={<StudentTimetable />} />
