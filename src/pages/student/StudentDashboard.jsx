@@ -11,7 +11,7 @@ import api from "../../utils/axiosInstance";
 import ViewAttendance from "./ViewAttendance";
 import ViewMarks from "./ViewMarks";
 import ViewFees from "./ViewFees";
-Studentattendance.jsx
+import StudentAttendance from "./StudentAttendance";
 import AIPrediction from "./AIPrediction";
 
 
