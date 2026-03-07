@@ -94,7 +94,7 @@ export default function Login() {
               </AnimatePresence>
             </motion.button>
           </form>
-          <p className="text-center text-white/30 text-xs mt-6">© 2025 College ERP System</p>
+          <p className="text-center text-white/30 text-xs mt-6">© 2026 College ERP System</p>
         </div>
       </motion.div>
     </div>

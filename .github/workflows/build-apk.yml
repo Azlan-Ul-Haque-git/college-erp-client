@@ -1,60 +1,50 @@
 name: Build Android APK
-
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-
       - name: Install dependencies
         run: npm install
-
       - name: Build web app
         run: npm run build
         env:
           VITE_API_URL: https://college-erp-server-kvc4.onrender.com/api
           VITE_SOCKET_URL: https://college-erp-server-kvc4.onrender.com
           VITE_RAZORPAY_KEY_ID: rzp_live_SN231JB1uxCoR7
-
       - name: Install Capacitor
         run: npm install @capacitor/core@latest @capacitor/cli@latest @capacitor/android@latest
-
       - name: Init Capacitor
         run: npx cap init "College ERP" "com.college.erp" --web-dir=dist
-
       - name: Add Android
         run: npx cap add android
-
+      - name: Add Android Permissions
+        run: |
+          sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.CAMERA" \/>\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" \/>\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" \/>\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" \/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" \/>\n    <uses-feature android:name="android.hardware.camera" android:required="true" \/>' android/app/src/main/AndroidManifest.xml
       - name: Update Gradle wrapper
         run: |
           cd android
           sed -i 's|gradle-8.2.1-all.zip|gradle-8.7-all.zip|g' gradle/wrapper/gradle-wrapper.properties
-
       - name: Sync Capacitor
         run: npx cap sync android
-
       - name: Build APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
-
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:

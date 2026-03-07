@@ -8,6 +8,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@capacitor/camera": "^8.0.2",
+    "@capacitor/geolocation": "^8.1.0",
     "@heroicons/react": "^2.1.1",
     "axios": "^1.6.2",
     "face-api.js": "^0.22.2",
