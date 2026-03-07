@@ -1,3 +1,4 @@
+import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
@@ -110,7 +111,7 @@ function StudentNotices() {
       ) : notices.length === 0 ? (
         <div className="card text-center py-12">
           <p className="text-4xl mb-3">📢</p>
-          <p className="text-slate-500">Koi notice nahi hai abhi</p>
+          <p className="text-slate-500">No notice Yet</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -158,22 +159,25 @@ function StudentChat() {
     const { data } = await api.get(`/chat/${u._id}`);
     setMessages(data.messages || []);
   };
-
   const sendMsg = async () => {
     if (!text.trim() || !selected || sending) return;
     setSending(true);
-    await api.post(`/chat/${selected._id}`, { content: text });
-    setText("");
-    const { data } = await api.get(`/chat/${selected._id}`);
-    setMessages(data.messages || []);
-    setSending(false);
+    try {
+      await api.post(`/chat/${selected._id}`, { content: text });
+      setText("");
+      const { data } = await api.get(`/chat/${selected._id}`);
+      setMessages(data.messages || []);
+    } catch (err) {
+      toast.error("Message sent Failed!");
+    } finally {
+      setSending(false);
+    }
   };
-
   return (
     <div className="space-y-4">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Chat</h1>
-        <p className="text-slate-500 text-sm mt-1">Faculty se seedha baat karo</p>
+        <p className="text-slate-500 text-sm mt-1">Talk to your faculty members</p>
       </motion.div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4" style={{ height: "600px" }}>
@@ -181,7 +185,7 @@ function StudentChat() {
         <div className="card overflow-y-auto">
           <h3 className="font-semibold dark:text-white mb-3 text-sm text-slate-500 uppercase tracking-wide">Faculty</h3>
           {users.length === 0 ? (
-            <p className="text-slate-400 text-sm text-center py-4">Koi faculty nahi mili</p>
+            <p className="text-slate-400 text-sm text-center py-4">No faculty members available</p>
           ) : users.map(u => (
             <div key={u._id} onClick={() => openChat(u)}
               className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer mb-1 transition ${selected?._id === u._id
@@ -215,7 +219,7 @@ function StudentChat() {
 
               <div className="flex-1 overflow-y-auto space-y-2 mb-3 pr-1">
                 {messages.length === 0 ? (
-                  <p className="text-slate-400 text-sm text-center py-8">Koi message nahi hai abhi — hi karo! 👋</p>
+                  <p className="text-slate-400 text-sm text-center py-8">No message Yet! Start Messaging Now 👋</p>
                 ) : messages.map((m, i) => (
                   <div key={i} className={`flex ${m.sender?._id === user?._id ? "justify-end" : "justify-start"}`}>
                     <div className={`px-3 py-2 rounded-2xl text-sm max-w-xs break-words ${m.sender?._id === user?._id
@@ -233,7 +237,7 @@ function StudentChat() {
                   value={text}
                   onChange={e => setText(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && sendMsg()}
-                  placeholder="Message likho..."
+                  placeholder="Type Message..."
                   className="flex-1 border dark:border-slate-600 rounded-xl px-3 py-2 text-sm dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
                 />
                 <button
@@ -248,7 +252,7 @@ function StudentChat() {
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <p className="text-4xl mb-3">💬</p>
-              <p className="text-slate-400">Faculty select karo baat karne ke liye</p>
+              <p className="text-slate-400">Select Faculty Member to talk</p>
             </div>
           )}
         </div>
@@ -356,7 +360,7 @@ function StudentHome() {
           </div>
           {attendancePct < 75 && (
             <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-xl text-sm text-red-600 dark:text-red-400">
-              ⚠️ Attendance 75% se kam hai! Aur classes attend karo.
+              ⚠️ Attendance is below 75% ! Come to college and attend classes.
             </div>
           )}
         </motion.div>

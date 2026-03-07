@@ -3,14 +3,10 @@
   "appName": "College ERP",
   "webDir": "dist",
   "server": {
-    "androidScheme": "https"
+    "url": "https://college-erp-client-eight.vercel.app",
+    "cleartext": true
   },
   "android": {
     "allowMixedContent": true
-  },
-  "plugins": {
-    "Camera": {
-      "presentationStyle": "fullscreen"
-    }
   }
 }

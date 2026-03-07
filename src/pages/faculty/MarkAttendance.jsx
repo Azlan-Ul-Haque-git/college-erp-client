@@ -42,7 +42,7 @@ export default function MarkAttendance() {
       const img2 = await faceapi.fetchImage(studentPhoto);
 
       if (!img1 || !img2) {
-        alert("Image load nahi hui!");
+        alert("Image Doesnt loaded!");
         return false;
       }
 
@@ -58,7 +58,7 @@ export default function MarkAttendance() {
         .withFaceDescriptor();
 
       if (!d1 || !d2) {
-        alert("Face detect nahi hua!");
+        alert("Face detection failed!");
         return false;
       }
 
@@ -87,7 +87,7 @@ export default function MarkAttendance() {
   };
 
   const markFacultyAttendance = async () => {
-    if (!navigator.geolocation) return setMessage("GPS nahi hai!");
+    if (!navigator.geolocation) return setMessage("GPS not working!");
     navigator.geolocation.getCurrentPosition(async (pos) => {
       try {
         const { data } = await axios.post("/attendance/faculty-checkin", {
@@ -104,19 +104,19 @@ export default function MarkAttendance() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">✅ Attendance Verify Karo</h1>
+      <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">✅ Attendance Verify Please </h1>
 
       {/* Faculty own attendance */}
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-5 mb-6 text-white">
-        <h2 className="font-bold text-lg mb-2">Meri Apni Attendance</h2>
-        <p className="text-sm opacity-80 mb-3">Aaj college aa gaye ho? Location se verify karo!</p>
+        <h2 className="font-bold text-lg mb-2">MY Attendance</h2>
+        <p className="text-sm opacity-80 mb-3">You are out of college campus? Please Verify from Exact location!</p>
         {!facultyCheckin ? (
           <button onClick={markFacultyAttendance} className="bg-white text-purple-700 px-5 py-2 rounded-xl font-bold">
-            📍 Meri Attendance Mark Karo
+            📍 Mark My Attendance
           </button>
         ) : (
           <div className="bg-green-400/30 px-4 py-2 rounded-xl inline-block font-bold">
-            ✅ Aaj ki attendance ho gayi!
+            ✅ Todays Attendance Marked Successfully!
           </div>
         )}
       </div>
@@ -152,7 +152,7 @@ export default function MarkAttendance() {
           onClick={fetchPending}
           className="w-full bg-purple-600 text-white py-2 rounded-xl font-semibold"
         >
-          🔍 Students Dekho
+          🔍 View Students
         </button>
       </div>
 
@@ -165,7 +165,7 @@ export default function MarkAttendance() {
         {loading ? (
           <p className="text-center text-gray-400 py-8">Loading...</p>
         ) : pending.length === 0 ? (
-          <p className="text-center text-gray-400 py-8">Koi pending nahi hai! 🎉</p>
+          <p className="text-center text-gray-400 py-8">No Pending! 🎉</p>
         ) : (
           <div className="space-y-4">
             {pending.map((p) => (
@@ -213,7 +213,7 @@ export default function MarkAttendance() {
                         const studentPhoto = p.student?.user?.photo;
 
                         if (!studentPhoto) {
-                          alert("Student profile photo nahi hai!");
+                          alert("There is no profile photo of student!");
                           setVerifying(false);
                           return;
                         }
@@ -223,7 +223,7 @@ export default function MarkAttendance() {
                         if (matched) {
                           verifyAttendance(p._id, "present");
                         } else {
-                          alert("❌ Face match nahi hua!");
+                          alert("❌ Face cannot be matched!");
                         }
 
                         setVerifying(false);

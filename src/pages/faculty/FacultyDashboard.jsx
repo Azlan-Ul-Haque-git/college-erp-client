@@ -144,12 +144,12 @@ function FacultyChat() {
               </div>
               <div className="flex gap-2">
                 <input value={text} onChange={e => setText(e.target.value)} onKeyDown={e => e.key === "Enter" && sendMsg()}
-                  placeholder="Message likho..." className="flex-1 border rounded-xl px-3 py-2 text-sm dark:bg-slate-700 dark:text-white dark:border-slate-600" />
+                  placeholder="Type Message..." className="flex-1 border rounded-xl px-3 py-2 text-sm dark:bg-slate-700 dark:text-white dark:border-slate-600" />
                 <button onClick={sendMsg} className="bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-semibold">Send</button>
               </div>
             </>
           ) : (
-            <p className="text-slate-400 text-center my-auto">Kisi ko select karo chat karne ke liye</p>
+            <p className="text-slate-400 text-center my-auto">Select Student to Talk</p>
           )}
         </div>
       </div>
