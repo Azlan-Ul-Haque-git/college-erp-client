@@ -217,6 +217,7 @@ export default function ManageStudents() {
             </motion.div>
           </motion.div>
         )}
+        
       </AnimatePresence>
     </div>
   );
