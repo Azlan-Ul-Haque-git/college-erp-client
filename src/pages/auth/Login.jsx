@@ -14,7 +14,7 @@ const ROLES = [
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "", id: "" });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [activeRole, setActiveRole] = useState("student");
@@ -70,7 +70,7 @@ export default function Login() {
                 <input name="password" type={showPass?"text":"password"} placeholder="••••••••" value={form.password}
                   onChange={e => setForm(p=>({...p, password:e.target.value}))}
                   className="w-full bg-white/10 border border-white/20 text-white placeholder-white/30 rounded-xl px-4 py-3 pr-12 text-sm focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition" />
-                <button type="button" onClick={() => setShowPass(p=>!p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition">
+                <button type="button" onClick={() => setShowPass(p=>!p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-black/40 hover:text-black transition">
                   {showPass ? <EyeSlashIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                 </button>
               </div>
