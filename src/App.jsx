@@ -5,8 +5,10 @@ import Login from "./pages/auth/Login";
 import ForgotPassword from "./pages/auth/ForgotPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Loader from "./components/Loader";
+import ProfileSettings from "./pages/ProfileSettings";
 
-const AdminDashboard   = lazy(() => import("./pages/admin/AdminDashboard"));
+
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const FacultyDashboard = lazy(() => import("./pages/faculty/FacultyDashboard"));
 const StudentDashboard = lazy(() => import("./pages/student/StudentDashboard"));
 
@@ -15,12 +17,15 @@ export default function App() {
   return (
     <Suspense fallback={<Loader />}>
       <Routes>
-        <Route path="/login"           element={!user ? <Login /> : <Navigate to={`/${user.role}/dashboard`} />} />
+        <Route path="/login" element={!user ? <Login /> : <Navigate to={`/${user.role}/dashboard`} />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/admin/*"   element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/*" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
         <Route path="/faculty/*" element={<ProtectedRoute role="faculty"><FacultyDashboard /></ProtectedRoute>} />
         <Route path="/student/*" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
-        <Route path="*"          element={<Navigate to="/login" />} />
+        <Route path="/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
+        <Route path="*" element={<Navigate to="/login" />} />
+
+
       </Routes>
     </Suspense>
   );

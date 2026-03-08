@@ -5,7 +5,8 @@ import DarkModeToggle from "./DarkModeToggle";
 import {
   HomeIcon, UsersIcon, AcademicCapIcon, ClipboardDocumentListIcon,
   BanknotesIcon, BellIcon, CalendarIcon, ChatBubbleLeftRightIcon,
-  ChartBarIcon, ArrowLeftOnRectangleIcon, Bars3Icon, XMarkIcon
+  ChartBarIcon, ArrowLeftOnRectangleIcon, Bars3Icon, XMarkIcon,
+  UserCircleIcon
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
@@ -20,6 +21,7 @@ const MENUS = {
     { label: "Notices", path: "/admin/notices", icon: BellIcon },
     { label: "Timetable", path: "/admin/timetable", icon: CalendarIcon },
     { label: "Reports", path: "/admin/reports", icon: ChartBarIcon },
+    { label: "Settings", path: "/profile", icon: UserCircleIcon },
   ],
   faculty: [
     { label: "Dashboard", path: "/faculty/dashboard", icon: HomeIcon },
@@ -28,6 +30,7 @@ const MENUS = {
     { label: "Timetable", path: "/faculty/timetable", icon: CalendarIcon },
     { label: "Notices", path: "/faculty/notices", icon: BellIcon },
     { label: "Chat", path: "/faculty/chat", icon: ChatBubbleLeftRightIcon },
+    { label: "Settings", path: "/profile", icon: UserCircleIcon },
   ],
   student: [
     { label: "Dashboard", path: "/student/dashboard", icon: HomeIcon },
@@ -38,6 +41,7 @@ const MENUS = {
     { label: "Notices", path: "/student/notices", icon: BellIcon },
     { label: "AI Report", path: "/student/ai", icon: ChartBarIcon },
     { label: "Chat", path: "/student/chat", icon: ChatBubbleLeftRightIcon },
+    { label: "Settings", path: "/profile", icon: UserCircleIcon },
   ],
 };
 
@@ -58,8 +62,14 @@ export default function Sidebar() {
     <div className="flex flex-col h-full">
       <div className={`p-4 bg-gradient-to-r ${color}`}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-            {user?.name?.[0]?.toUpperCase()}
+          <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0">
+            {user?.avatar ? (
+              <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white font-bold text-lg">
+                {user?.name?.[0]?.toUpperCase()}
+              </div>
+            )}
           </div>
           <div className="overflow-hidden">
             <p className="text-white font-semibold text-sm truncate">{user?.name}</p>
@@ -67,6 +77,7 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
+
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {menu.map(item => (
           <NavLink key={item.path} to={item.path} onClick={() => setOpen(false)}
@@ -80,6 +91,7 @@ export default function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
       <div className="p-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between">
         <DarkModeToggle />
         <button onClick={() => { logout(); navigate("/login"); }}
@@ -92,12 +104,10 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile toggle */}
       <button onClick={() => setOpen(true)} className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700">
         <Bars3Icon className="w-5 h-5 text-slate-700 dark:text-white" />
       </button>
 
-      {/* Mobile drawer */}
       <AnimatePresence>
         {open && (
           <>
@@ -114,7 +124,6 @@ export default function Sidebar() {
         )}
       </AnimatePresence>
 
-      {/* Desktop sidebar */}
       <div className="hidden lg:flex lg:flex-col w-64 h-screen bg-white dark:bg-slate-800 border-r border-slate-100 dark:border-slate-700 shadow-sm fixed left-0 top-0">
         <SidebarContent />
       </div>
