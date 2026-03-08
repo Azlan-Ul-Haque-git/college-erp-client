@@ -3,13 +3,14 @@ import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import api from "../utils/axiosInstance";
 import toast from "react-hot-toast";
-import { CameraIcon } from "@heroicons/react/24/outline";
+import { CameraIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import Layout from "../components/Layout";
 
 export default function ProfileSettings() {
     const { user, updateUser } = useAuth();
     const [form, setForm] = useState({ name: user?.name || "", email: user?.email || "", phone: user?.phone || "" });
     const [pass, setPass] = useState({ old: "", new: "", confirm: "" });
+    const [showPass, setShowPass] = useState({ old: false, new: false, confirm: false });
     const [saving, setSaving] = useState(false);
     const [savingPass, setSavingPass] = useState(false);
     const [avatar, setAvatar] = useState(user?.avatar || null);
@@ -90,7 +91,7 @@ export default function ProfileSettings() {
                     </div>
                 </motion.div>
 
-                {/* Profile Info */}
+                {/* Personal Info */}
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="card">
                     <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Personal Information</h3>
                     <div className="space-y-4">
@@ -122,8 +123,19 @@ export default function ProfileSettings() {
                         ].map(f => (
                             <div key={f.name}>
                                 <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">{f.label}</label>
-                                <input type="password" value={pass[f.name]} onChange={e => setPass(p => ({ ...p, [f.name]: e.target.value }))}
-                                    className="input" placeholder={f.label} />
+                                <div className="relative">
+                                    <input
+                                        type={showPass[f.name] ? "text" : "password"}
+                                        value={pass[f.name]}
+                                        onChange={e => setPass(p => ({ ...p, [f.name]: e.target.value }))}
+                                        className="input pr-10"
+                                        placeholder={f.label}
+                                    />
+                                    <button type="button" onClick={() => setShowPass(p => ({ ...p, [f.name]: !p[f.name] }))}
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                                        {showPass[f.name] ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+                                    </button>
+                                </div>
                             </div>
                         ))}
                         <button onClick={handlePasswordChange} disabled={savingPass} className="btn-primary w-full">

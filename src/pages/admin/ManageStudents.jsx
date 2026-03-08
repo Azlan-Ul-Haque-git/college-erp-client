@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../utils/axiosInstance";
 import toast from "react-hot-toast";
-import { PlusIcon, MagnifyingGlassIcon, PencilIcon, TrashIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { PlusIcon, MagnifyingGlassIcon, PencilIcon, TrashIcon, XMarkIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const EMPTY = { name:"", email:"", password:"", phone:"", rollNo:"", branch:"CSE", year:1, semester:1, section:"A", admissionNo:"", parentName:"", parentPhone:"" };
 
@@ -14,6 +14,7 @@ export default function ManageStudents() {
   const [editing, setEditing]   = useState(null);
   const [form, setForm]         = useState(EMPTY);
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const fetchStudents = useCallback(async () => {
     try {
@@ -25,12 +26,13 @@ export default function ManageStudents() {
 
   useEffect(() => { fetchStudents(); }, [fetchStudents]);
 
-  const openAdd  = () => { setEditing(null); setForm(EMPTY); setModal(true); };
+  const openAdd  = () => { setEditing(null); setForm(EMPTY); setShowPassword(false); setModal(true); };
   const openEdit = (s) => {
     setEditing(s._id);
     setForm({ name:s.user?.name||"", email:s.user?.email||"", password:"", phone:s.user?.phone||"",
       rollNo:s.rollNo, branch:s.branch, year:s.year, semester:s.semester, section:s.section,
       admissionNo:s.admissionNo||"", parentName:s.parentName||"", parentPhone:s.parentPhone||"" });
+    setShowPassword(false);
     setModal(true);
   };
 
@@ -79,14 +81,12 @@ export default function ManageStudents() {
         </motion.button>
       </div>
 
-      {/* Search */}
       <div className="relative">
         <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
         <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search by name, roll no, branch..."
           className="input pl-10" />
       </div>
 
-      {/* Table */}
       <div className="card p-0 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -135,7 +135,6 @@ export default function ManageStudents() {
         </div>
       </div>
 
-      {/* Modal */}
       <AnimatePresence>
         {modal && (
           <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
@@ -152,7 +151,6 @@ export default function ManageStudents() {
                 {[
                   { label:"Full Name",    name:"name",        type:"text",   required:true },
                   { label:"Email",        name:"email",       type:"email",  required:true },
-                  { label:"Password",     name:"password",    type:"password", required:!editing },
                   { label:"Phone",        name:"phone",       type:"text" },
                   { label:"Roll No",      name:"rollNo",      type:"text",   required:true },
                   { label:"Admission No", name:"admissionNo", type:"text" },
@@ -165,6 +163,26 @@ export default function ManageStudents() {
                       required={f.required} className="input" placeholder={f.label} />
                   </div>
                 ))}
+
+                {/* Password with show/hide */}
+                <div>
+                  <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Password{!editing && " *"}</label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={form.password}
+                      onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
+                      required={!editing}
+                      className="input pr-10"
+                      placeholder="Password"
+                    />
+                    <button type="button" onClick={() => setShowPassword(p => !p)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                      {showPassword ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
                 <div>
                   <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Branch *</label>
                   <select value={form.branch} onChange={e=>setForm(p=>({...p, branch:e.target.value}))} className="input">
