@@ -7,7 +7,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Loader from "./components/Loader";
 import ProfileSettings from "./pages/ProfileSettings";
 
-
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const FacultyDashboard = lazy(() => import("./pages/faculty/FacultyDashboard"));
 const StudentDashboard = lazy(() => import("./pages/student/StudentDashboard"));
@@ -22,10 +21,8 @@ export default function App() {
         <Route path="/admin/*" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
         <Route path="/faculty/*" element={<ProtectedRoute role="faculty"><FacultyDashboard /></ProtectedRoute>} />
         <Route path="/student/*" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
+        <Route path="/profile" element={user ? <ProfileSettings /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to="/login" />} />
-
-
       </Routes>
     </Suspense>
   );
