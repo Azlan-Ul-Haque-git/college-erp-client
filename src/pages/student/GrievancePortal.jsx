@@ -35,7 +35,7 @@ export default function GrievancePortal() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">😢 Grievance Portal</h1>
-          <p className="text-slate-500 text-sm">Apni problems yahan submit karo</p>
+          <p className="text-slate-500 text-sm">Submit your grievances here</p>
         </div>
         <motion.button whileTap={{ scale: 0.95 }} onClick={() => { setForm(EMPTY); setModal(true); }}
           className="btn-primary flex items-center gap-2">
