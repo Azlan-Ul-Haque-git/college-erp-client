@@ -51,7 +51,7 @@ export default function LeaveApplication() {
         {leaves.length === 0 ? (
           <div className="card text-center py-12">
             <p className="text-4xl mb-3">🏖️</p>
-            <p className="text-slate-400">Koi leave application nahi hai</p>
+            <p className="text-slate-400">No leave applications yet. Apply for one!</p>
           </div>
         ) : leaves.map((l, i) => (
           <motion.div key={l._id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}

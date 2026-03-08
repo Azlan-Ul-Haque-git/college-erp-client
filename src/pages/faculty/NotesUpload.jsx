@@ -47,7 +47,7 @@ export default function NotesUpload() {
         {notes.length === 0 ? (
           <div className="card col-span-3 text-center py-12">
             <p className="text-4xl mb-3">📚</p>
-            <p className="text-slate-400">Koi notes nahi hain — upload karo!</p>
+            <p className="text-slate-400">No notes uploaded yet.Upload one!</p>
           </div>
         ) : notes.map((n, i) => (
           <motion.div key={n._id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
@@ -106,13 +106,13 @@ export default function NotesUpload() {
                   <div>
                     <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Branch</label>
                     <select value={form.branch} onChange={e => setForm(p => ({ ...p, branch: e.target.value }))} className="input">
-                      {["ALL","CSE","IT","ECE","EE","ME","CE"].map(b => <option key={b}>{b}</option>)}
+                      {["ALL", "CSE", "IT", "ECE", "EE", "ME", "CE"].map(b => <option key={b}>{b}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Semester</label>
                     <select value={form.semester} onChange={e => setForm(p => ({ ...p, semester: +e.target.value }))} className="input">
-                      {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Sem {s}</option>)}
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map(s => <option key={s} value={s}>Sem {s}</option>)}
                     </select>
                   </div>
                 </div>

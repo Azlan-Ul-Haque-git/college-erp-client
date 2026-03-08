@@ -21,7 +21,7 @@ export default function IDCard() {
 
   const roleColor = user?.role === "admin" ? "from-violet-600 to-purple-700"
     : user?.role === "faculty" ? "from-blue-600 to-cyan-700"
-    : "from-emerald-600 to-teal-700";
+      : "from-emerald-600 to-teal-700";
 
   const roleBg = user?.role === "admin" ? "#7c3aed"
     : user?.role === "faculty" ? "#2563eb" : "#059669";
@@ -31,7 +31,7 @@ export default function IDCard() {
       <div className="max-w-lg mx-auto space-y-6 p-4">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">🪪 ID Card</h1>
-          <p className="text-slate-500 text-sm mt-1">Apna digital ID card download karo</p>
+          <p className="text-slate-500 text-sm mt-1">Download your digital ID card</p>
         </motion.div>
 
         {/* ID Card */}
@@ -81,7 +81,7 @@ export default function IDCard() {
                   </div>
                   <div className="flex gap-2 text-xs">
                     <span className="text-white/40">Valid:</span>
-                    <span className="text-white/80">2024 - 2025</span>
+                    <span className="text-white/80">2025 - 2028</span>
                   </div>
                 </div>
               </div>
@@ -114,7 +114,7 @@ export default function IDCard() {
         </motion.button>
 
         <p className="text-center text-slate-400 text-xs">
-          Yeh card official use ke liye valid hai
+          This digital ID card is for personal use and does not replace any official identification issued by the college.
         </p>
       </div>
     </Layout>
