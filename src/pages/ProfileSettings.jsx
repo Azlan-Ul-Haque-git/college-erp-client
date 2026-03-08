@@ -86,7 +86,7 @@ export default function ProfileSettings() {
                         <div>
                             <p className="font-semibold text-slate-800 dark:text-white">{user?.name}</p>
                             <p className="text-sm text-slate-500 capitalize">{user?.role}</p>
-                            <p className="text-xs text-slate-400 mt-1">{uploadingAvatar ? "Uploading..." : "Camera icon click karke photo change karo"}</p>
+                            <p className="text-xs text-slate-400 mt-1">{uploadingAvatar ? "Uploading..." : "Click the camera icon to change your photo"}</p>
                         </div>
                     </div>
                 </motion.div>

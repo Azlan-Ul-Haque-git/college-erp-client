@@ -41,7 +41,7 @@ export default function StudyMaterial() {
       : filtered.length === 0 ? (
         <div className="card text-center py-12">
           <p className="text-4xl mb-3">📭</p>
-          <p className="text-slate-400">Koi study material nahi mila</p>
+          <p className="text-slate-400">No study material found</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

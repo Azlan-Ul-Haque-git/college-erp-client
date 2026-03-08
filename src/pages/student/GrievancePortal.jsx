@@ -61,7 +61,7 @@ export default function GrievancePortal() {
         {grievances.length === 0 ? (
           <div className="card text-center py-12">
             <p className="text-4xl mb-3">😊</p>
-            <p className="text-slate-400">Koi grievance nahi hai — sab theek hai!</p>
+            <p className="text-slate-400">No grievances submitted yet</p>
           </div>
         ) : grievances.map((g, i) => (
           <motion.div key={g._id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
@@ -107,12 +107,12 @@ export default function GrievancePortal() {
                 <div>
                   <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Subject *</label>
                   <input type="text" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))}
-                    required className="input" placeholder="Grievance ka subject" />
+                    required className="input" placeholder="Subject of Grevience" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Description *</label>
                   <textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
-                    required rows={4} className="input resize-none" placeholder="Apni problem detail mein likhो..." />
+                    required rows={4} className="input resize-none" placeholder="Describe your grievance in detail..." />
                 </div>
                 <div className="flex gap-3 justify-end">
                   <button type="button" onClick={() => setModal(false)} className="btn-secondary">Cancel</button>

@@ -24,7 +24,7 @@ export default function StudentAssignments() {
       : assignments.length === 0 ? (
         <div className="card text-center py-12">
           <p className="text-4xl mb-3">🎉</p>
-          <p className="text-slate-400">Koi assignment nahi hai abhi!</p>
+          <p className="text-slate-400">No assignments available yet</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
