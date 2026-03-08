@@ -10,6 +10,9 @@ import ManageStudents from "./ManageStudents";
 import ManageFaculty from "./ManageFaculty";
 import ManageFees from "./ManageFees";
 import ManageNotices from "./ManageNotices";
+import LeaveManagement from "./LeaveManagement";
+import ExamManagement from "./ExamManagement";
+import GrievanceManagement from "./GrievanceManagement";
 
 const COLORS = ["#7c3aed", "#2563eb", "#059669", "#f59e0b"];
 
@@ -272,6 +275,9 @@ export default function AdminDashboard() {
         <Route path="timetable/*" element={<AdminTimetable />} />
         <Route path="reports/*" element={<AdminReports />} />
         <Route path="*" element={<DashboardHome />} />
+        <Route path="leaves/*" element={<LeaveManagement />} />
+        <Route path="exams/*" element={<ExamManagement />} />
+        <Route path="grievances/*" element={<GrievanceManagement />} />
       </Routes>
     </Layout>
   );

@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import { SocketProvider } from "./context/SocketContext";
 import App from "./App";
 import "./index.css";
@@ -12,18 +13,22 @@ ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <ThemeProvider>
-        <AuthProvider>
-          <SocketProvider>
-            <App />
-            <Toaster position="top-right"
-              toastOptions={{
-                style: { background:"#1e1b4b", color:"#fff", border:"1px solid rgba(255,255,255,0.1)", borderRadius:"12px" },
-                success: { iconTheme: { primary:"#a78bfa", secondary:"#1e1b4b" } },
-                error:   { iconTheme: { primary:"#f87171", secondary:"#1e1b4b" } },
-              }} />
-          </SocketProvider>
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+
+            <SocketProvider>
+              <App />
+              <Toaster position="top-right"
+                toastOptions={{
+                  style: { background: "#1e1b4b", color: "#fff", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "12px" },
+                  success: { iconTheme: { primary: "#a78bfa", secondary: "#1e1b4b" } },
+                  error: { iconTheme: { primary: "#f87171", secondary: "#1e1b4b" } },
+                }} />
+            </SocketProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </ThemeProvider>
+
     </BrowserRouter>
   </React.StrictMode>
 );

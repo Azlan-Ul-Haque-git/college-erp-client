@@ -6,7 +6,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Loader from "./components/Loader";
 import ProfileSettings from "./pages/ProfileSettings";
-
+import IDCard from "./pages/IDCard";
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const FacultyDashboard = lazy(() => import("./pages/faculty/FacultyDashboard"));
 const StudentDashboard = lazy(() => import("./pages/student/StudentDashboard"));
@@ -23,6 +23,7 @@ export default function App() {
         <Route path="/student/*" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
         <Route path="/profile" element={user ? <ProfileSettings /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="/idcard" element={user ? <IDCard /> : <Navigate to="/login" />} />
       </Routes>
     </Suspense>
   );

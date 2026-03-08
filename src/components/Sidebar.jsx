@@ -21,7 +21,11 @@ const MENUS = {
     { label: "Notices", path: "/admin/notices", icon: BellIcon },
     { label: "Timetable", path: "/admin/timetable", icon: CalendarIcon },
     { label: "Reports", path: "/admin/reports", icon: ChartBarIcon },
+    { label: "ID Card", path: "/idcard", icon: UserCircleIcon },
+    { label: "Leaves", path: "/admin/leaves", icon: CalendarIcon },
     { label: "Settings", path: "/profile", icon: UserCircleIcon },
+    { label: "Exams", path: "/admin/exams", icon: CalendarIcon },
+    { label: "Grievances", path: "/admin/grievances", icon: BellIcon },
   ],
   faculty: [
     { label: "Dashboard", path: "/faculty/dashboard", icon: HomeIcon },
@@ -30,6 +34,10 @@ const MENUS = {
     { label: "Timetable", path: "/faculty/timetable", icon: CalendarIcon },
     { label: "Notices", path: "/faculty/notices", icon: BellIcon },
     { label: "Chat", path: "/faculty/chat", icon: ChatBubbleLeftRightIcon },
+    { label: "ID Card", path: "/idcard", icon: UserCircleIcon },
+    { label: "Assignments", path: "/faculty/assignments", icon: ClipboardDocumentListIcon },
+    { label: "Notes", path: "/faculty/notes", icon: AcademicCapIcon },
+    { label: "Leave", path: "/faculty/leaves", icon: CalendarIcon },
     { label: "Settings", path: "/profile", icon: UserCircleIcon },
   ],
   student: [
@@ -41,7 +49,13 @@ const MENUS = {
     { label: "Notices", path: "/student/notices", icon: BellIcon },
     { label: "AI Report", path: "/student/ai", icon: ChartBarIcon },
     { label: "Chat", path: "/student/chat", icon: ChatBubbleLeftRightIcon },
+    { label: "ID Card", path: "/idcard", icon: UserCircleIcon },
     { label: "Settings", path: "/profile", icon: UserCircleIcon },
+    { label: "Assignments", path: "/student/assignments", icon: ClipboardDocumentListIcon },
+    { label: "Study Material", path: "/student/study-material", icon: AcademicCapIcon },
+    { label: "Exam Schedule", path: "/student/exam-schedule", icon: CalendarIcon },
+    { label: "Result Card", path: "/student/result", icon: ChartBarIcon },
+    { label: "Grievance", path: "/student/grievance", icon: BellIcon },
   ],
 };
 

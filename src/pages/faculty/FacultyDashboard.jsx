@@ -8,6 +8,9 @@ import { ClipboardDocumentListIcon, ChartBarIcon, BellIcon, CalendarIcon } from 
 import api from "../../utils/axiosInstance";
 import MarkAttendance from "./MarkAttendance";
 import UploadMarks from "./UploadMarks";
+import AssignmentManager from "./AssignmentManager";
+import LeaveApplication from "./LeaveApplication";
+import NotesUpload from "./NotesUpload";
 
 // Faculty Notices Page
 function FacultyNotices() {
@@ -36,7 +39,7 @@ function FacultyNotices() {
                 <p className="text-xs text-slate-400 mt-2">By: {n.postedBy?.name} · {new Date(n.createdAt).toLocaleDateString()}</p>
               </div>
               <span className={`text-xs px-2 py-1 rounded-full font-medium ml-3 ${n.targetRole === "all" ? "bg-purple-100 text-purple-700" :
-                  n.targetRole === "faculty" ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"
+                n.targetRole === "faculty" ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"
                 }`}>{n.targetRole}</span>
             </div>
           </motion.div>
@@ -227,6 +230,9 @@ export default function FacultyDashboard() {
         <Route path="notices" element={<FacultyNotices />} />
         <Route path="chat" element={<FacultyChat />} />
         <Route path="*" element={<FacultyHome />} />
+        <Route path="assignments" element={<AssignmentManager />} />
+        <Route path="leaves" element={<LeaveApplication />} />
+        <Route path="notes" element={<NotesUpload />} />
       </Routes>
     </Layout>
   );

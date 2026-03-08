@@ -14,7 +14,11 @@ import ViewMarks from "./ViewMarks";
 import ViewFees from "./ViewFees";
 import StudentAttendance from "./StudentAttendance";
 import AIPrediction from "./AIPrediction";
-
+import ResultCard from "./ResultCard";
+import ExamSchedule from "./ExamSchedule";
+import GrievancePortal from "./GrievancePortal";
+import StudyMaterial from "./StudyMaterial";
+import StudentAssignments from "./StudentAssignments";
 
 // ─── Student Timetable ───────────────────────────────────────────────────────
 function StudentTimetable() {
@@ -385,6 +389,11 @@ export default function StudentDashboard() {
         <Route path="chat" element={<StudentChat />} />
         <Route path="ai" element={<AIPrediction />} />
         <Route path="*" element={<StudentHome />} />
+        <Route path="result" element={<ResultCard />} />
+        <Route path="exam-schedule" element={<ExamSchedule />} />
+        <Route path="grievance" element={<GrievancePortal />} />
+        <Route path="study-material" element={<StudyMaterial />} />
+        <Route path="assignments" element={<StudentAssignments />} />
       </Routes>
     </Layout>
   );
