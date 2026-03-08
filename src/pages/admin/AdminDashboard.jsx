@@ -90,7 +90,7 @@ function DashboardHome() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="card">
         <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Faculty Attendance Today</h3>
         {facultyAttendance.length === 0 ? (
-          <p className="text-slate-400 text-sm text-center py-4">Aaj koi faculty attendance record nahi hai</p>
+          <p className="text-slate-400 text-sm text-center py-4">No faculty attendance records found for today</p>
         ) : (
           <div className="space-y-2">
             {facultyAttendance.slice(0, 5).map((r, i) => (
@@ -135,13 +135,13 @@ function AdminAttendance() {
         {tab === "student" ? (
           <div>
             <h3 className="font-semibold dark:text-white mb-4">Student Attendance Records</h3>
-            <p className="text-slate-400 text-sm text-center py-8">Student attendance reports yahan dikhenge</p>
+            <p className="text-slate-400 text-sm text-center py-8">No student attendance records found</p>
           </div>
         ) : (
           <div>
             <h3 className="font-semibold dark:text-white mb-4">Faculty Attendance Records ({facultyAttendance.length})</h3>
             {facultyAttendance.length === 0 ? (
-              <p className="text-slate-400 text-sm text-center py-8">Koi faculty attendance record nahi hai abhi</p>
+              <p className="text-slate-400 text-sm text-center py-8">No faculty attendance records found</p>
             ) : (
               <div className="space-y-2">
                 {facultyAttendance.map((r, i) => (
@@ -178,7 +178,7 @@ function AdminMarks() {
       <div className="card">
         <h3 className="font-semibold dark:text-white mb-4">All Students ({students.length})</h3>
         {students.length === 0 ? (
-          <p className="text-slate-400 text-center py-8">Koi student nahi mila</p>
+          <p className="text-slate-400 text-center py-8">No students found</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
