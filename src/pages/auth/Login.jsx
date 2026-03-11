@@ -231,6 +231,13 @@ export default function Login() {
                 <div className="text-right">
                   <button type="button" onClick={() => navigate("/forgot-password")}
                     className="text-purple-300 text-xs hover:text-purple-200 transition">Forgot password?</button>
+                  <p className="text-center text-white/40 text-xs mt-2">
+                    New user?{" "}
+                    <button type="button" onClick={() => navigate("/register")}
+                      className="text-purple-300 hover:text-purple-200 transition">
+                      Register here
+                    </button>
+                  </p>
                 </div>
 
                 {/* Submit */}

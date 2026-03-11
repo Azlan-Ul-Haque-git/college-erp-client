@@ -9,6 +9,7 @@ import ProfileSettings from "./pages/ProfileSettings";
 import IDCard from "./pages/IDCard";
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const FacultyDashboard = lazy(() => import("./pages/faculty/FacultyDashboard"));
+import Register from "./pages/auth/Register";
 const StudentDashboard = lazy(() => import("./pages/student/StudentDashboard"));
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/profile" element={user ? <ProfileSettings /> : <Navigate to="/login" />} />
         <Route path="*" element={<Navigate to="/login" />} />
         <Route path="/idcard" element={user ? <IDCard /> : <Navigate to="/login" />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </Suspense>
   );

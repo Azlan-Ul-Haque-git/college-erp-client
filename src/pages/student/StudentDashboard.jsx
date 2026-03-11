@@ -20,55 +20,63 @@ import GrievancePortal from "./GrievancePortal";
 import StudyMaterial from "./StudyMaterial";
 import StudentAssignments from "./StudentAssignments";
 
-// ─── Student Timetable ───────────────────────────────────────────────────────
 function StudentTimetable() {
-  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-  const schedule = [
-    { day: "Monday", time: "9:00 AM", subject: "Data Structures", faculty: "Prof. Sharma", room: "CS-101" },
-    { day: "Monday", time: "11:00 AM", subject: "DBMS", faculty: "Prof. Gupta", room: "CS-102" },
-    { day: "Monday", time: "2:00 PM", subject: "Computer Networks", faculty: "Prof. Verma", room: "CS-201" },
-    { day: "Tuesday", time: "10:00 AM", subject: "Operating Systems", faculty: "Prof. Singh", room: "CS-103" },
-    { day: "Tuesday", time: "12:00 PM", subject: "Software Engg", faculty: "Prof. Mishra", room: "CS-104" },
-    { day: "Wednesday", time: "9:00 AM", subject: "Data Structures", faculty: "Prof. Sharma", room: "CS-101" },
-    { day: "Wednesday", time: "11:00 AM", subject: "DBMS", faculty: "Prof. Gupta", room: "CS-102" },
-    { day: "Thursday", time: "10:00 AM", subject: "Computer Networks", faculty: "Prof. Verma", room: "CS-201" },
-    { day: "Thursday", time: "2:00 PM", subject: "Mathematics", faculty: "Prof. Joshi", room: "MA-101" },
-    { day: "Friday", time: "9:00 AM", subject: "Operating Systems", faculty: "Prof. Singh", room: "CS-103" },
-    { day: "Friday", time: "11:00 AM", subject: "Software Engg", faculty: "Prof. Mishra", room: "CS-104" },
-    { day: "Saturday", time: "10:00 AM", subject: "Mathematics", faculty: "Prof. Joshi", room: "MA-101" },
-  ];
+  const [timetable, setTimetable] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const [student, setStudent] = useState(null);
 
+  useEffect(() => {
+    api.get("/students").then(r => {
+      const s = r.data.students?.find(s => s.user?.email === user?.email);
+      setStudent(s);
+      if (s) {
+        api.get(`/timetable?branch=${s.branch}&semester=${s.semester}`)
+          .then(r2 => setTimetable(r2.data.timetable || []))
+          .catch(() => { })
+          .finally(() => setLoading(false));
+      } else setLoading(false);
+    }).catch(() => setLoading(false));
+  }, []);
+
+  const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const dayColors = {
     Monday: "from-purple-500 to-purple-600", Tuesday: "from-blue-500 to-blue-600",
     Wednesday: "from-emerald-500 to-emerald-600", Thursday: "from-orange-500 to-orange-600",
     Friday: "from-pink-500 to-pink-600", Saturday: "from-teal-500 to-teal-600",
   };
 
+  if (loading) return <div className="card text-center py-12"><p className="text-slate-400">Loading timetable...</p></div>;
+
   return (
     <div className="space-y-6">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <div>
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">My Timetable</h1>
-        <p className="text-slate-500 text-sm mt-1">Weekly class schedule</p>
-      </motion.div>
-
-      {days.map((day, di) => {
-        const classes = schedule.filter(s => s.day === day);
-        if (classes.length === 0) return null;
+        <p className="text-slate-500 text-sm">{student ? `${student.branch} · Sem ${student.semester}` : "Weekly schedule"}</p>
+      </div>
+      {timetable.length === 0 ? (
+        <div className="card text-center py-12">
+          <p className="text-4xl mb-3">📭</p>
+          <p className="text-slate-400">No timetable uploaded yet by admin</p>
+        </div>
+      ) : DAYS.map(day => {
+        const entries = timetable.filter(t => t.day === day);
+        if (!entries.length) return null;
         return (
-          <motion.div key={day} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: di * 0.05 }} className="card">
-            <div className={`inline-flex items-center px-3 py-1 rounded-full text-white text-sm font-bold bg-gradient-to-r ${dayColors[day]} mb-4`}>
+          <motion.div key={day} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="card">
+            <div className={`inline-flex px-3 py-1 rounded-full text-white text-sm font-bold bg-gradient-to-r ${dayColors[day]} mb-4`}>
               {day}
             </div>
             <div className="space-y-2">
-              {classes.map((c, i) => (
+              {entries.flatMap(e => e.slots.map((s, i) => (
                 <div key={i} className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                  <div className="text-xs font-bold text-purple-600 dark:text-purple-400 w-20 flex-shrink-0">{c.time}</div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-sm text-slate-700 dark:text-slate-200">{c.subject}</p>
-                    <p className="text-xs text-slate-400">{c.faculty} · Room {c.room}</p>
+                  <div className="text-xs font-bold text-purple-600 w-28 flex-shrink-0">{s.startTime} - {s.endTime}</div>
+                  <div>
+                    <p className="font-semibold text-sm dark:text-white">{s.subject}</p>
+                    <p className="text-xs text-slate-400">Room: {s.room}</p>
                   </div>
                 </div>
-              ))}
+              )))}
             </div>
           </motion.div>
         );
@@ -231,6 +239,11 @@ function StudentChat() {
                       : "bg-slate-100 dark:bg-slate-700 dark:text-white rounded-bl-sm"
                       }`}>
                       {m.content}
+                      {m.sender?._id === user?._id && (
+                        <span className="text-xs ml-2 opacity-70">
+                          {m.isRead ? "✓✓" : "✓"}
+                        </span>
+                      )}
                     </div>
                   </div>
                 ))}

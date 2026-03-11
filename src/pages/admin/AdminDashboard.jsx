@@ -13,6 +13,8 @@ import ManageNotices from "./ManageNotices";
 import LeaveManagement from "./LeaveManagement";
 import ExamManagement from "./ExamManagement";
 import GrievanceManagement from "./GrievanceManagement";
+import ManageTimetable from "./ManageTimetable";
+import RegistrationRequests from "./RegistrationRequests";
 
 const COLORS = ["#7c3aed", "#2563eb", "#059669", "#f59e0b"];
 
@@ -208,18 +210,6 @@ function AdminMarks() {
   );
 }
 
-// Admin Timetable Page
-function AdminTimetable() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Timetable Management</h1>
-      <div className="card">
-        <p className="text-slate-400 text-center py-8">Timetable management coming soon...</p>
-      </div>
-    </div>
-  );
-}
-
 // Admin Reports Page
 function AdminReports() {
   const [stats, setStats] = useState({ students: 0, faculty: 0 });
@@ -278,6 +268,8 @@ export default function AdminDashboard() {
         <Route path="leaves/*" element={<LeaveManagement />} />
         <Route path="exams/*" element={<ExamManagement />} />
         <Route path="grievances/*" element={<GrievanceManagement />} />
+        <Route path="timetable/*" element={<ManageTimetable />} />
+        <Route path="registrations/*" element={<RegistrationRequests />} />
       </Routes>
     </Layout>
   );
