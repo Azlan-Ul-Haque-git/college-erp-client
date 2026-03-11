@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Routes, Route } from "react-router-dom";
 import Layout from "../../components/Layout";
 import StatCard from "../../components/StatCard";
@@ -12,7 +12,6 @@ import AssignmentManager from "./AssignmentManager";
 import LeaveApplication from "./LeaveApplication";
 import NotesUpload from "./NotesUpload";
 import FacultyAttendance from "./FacultyAttendance";
-import { useState, useEffect, useRef } from "react";
 // Faculty Notices Page
 function FacultyNotices() {
   const [notices, setNotices] = useState([]);
