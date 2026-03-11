@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import api from "../../utils/axiosInstance";
 import toast from "react-hot-toast";
 
-const SUBJECTS = ["Mathematics","Physics","Chemistry","Computer Science","English","Data Structures","DBMS","Operating System","Computer Networks","Software Engineering"];
+const SUBJECTS = ["Mathematics", "Physics", "Chemistry", "Computer Science", "English", "Data Structures", "DBMS", "Operating System", "Computer Networks", "Software Engineering"];
 
 export default function StudentAttendance() {
   const videoRef = useRef(null);
@@ -39,29 +39,41 @@ export default function StudentAttendance() {
       { enableHighAccuracy: true }
     );
   };
-
   const startCamera = async () => {
     try {
-      const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+      const s = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+        audio: false
+      });
       setStream(s);
-      if (videoRef.current) videoRef.current.srcObject = s;
       setCameraOn(true);
-    } catch { setMessage("Camera access denied!"); }
+      // Wait for video element to render then set stream
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = s;
+          videoRef.current.play();
+        }
+      }, 100);
+    } catch (err) {
+      setMessage("Camera access denied! Please allow camera permission.");
+      toast.error("Camera access denied!");
+    }
   };
-
   const stopCamera = () => {
     if (stream) stream.getTracks().forEach(t => t.stop());
     setStream(null);
     setCameraOn(false);
   };
-
   const takeSelfie = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
+    if (!video || !canvas) { toast.error("Camera not ready!"); return; }
+    if (video.videoWidth === 0) { toast.error("Camera still loading, try again!"); return; }
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     canvas.getContext("2d").drawImage(video, 0, 0);
-    setSelfie(canvas.toDataURL("image/jpeg", 0.7));
+    const img = canvas.toDataURL("image/jpeg", 0.7);
+    setSelfie(img);
     stopCamera();
   };
 
@@ -141,7 +153,8 @@ export default function StudentAttendance() {
           )}
           {cameraOn && (
             <div className="text-center space-y-3">
-              <video ref={videoRef} autoPlay playsInline
+              <video ref={videoRef} autoPlay playsInline muted
+                onLoadedMetadata={() => videoRef.current?.play()}
                 className="w-full max-w-xs mx-auto rounded-2xl border-4 border-purple-200" />
               <canvas ref={canvasRef} className="hidden" />
               <div className="flex gap-3 justify-center">
@@ -198,11 +211,10 @@ export default function StudentAttendance() {
                   <p className="font-medium text-sm dark:text-white">{r.subject}</p>
                   <p className="text-xs text-slate-400">{r.date}</p>
                 </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                  r.status === "present" ? "bg-green-100 text-green-700"
+                <span className={`px-3 py-1 rounded-full text-xs font-bold ${r.status === "present" ? "bg-green-100 text-green-700"
                   : r.status === "absent" ? "bg-red-100 text-red-700"
-                  : "bg-yellow-100 text-yellow-700"
-                }`}>
+                    : "bg-yellow-100 text-yellow-700"
+                  }`}>
                   {r.status === "present" ? "✅ Present" : r.status === "absent" ? "❌ Absent" : "⏳ Pending"}
                 </span>
               </div>
