@@ -262,7 +262,7 @@ export default function AdminDashboard() {
         <Route path="notices/*" element={<ManageNotices />} />
         <Route path="attendance/*" element={<AdminAttendance />} />
         <Route path="marks/*" element={<AdminMarks />} />
-        <Route path="timetable/*" element={<AdminTimetable />} />
+        <Route path="timetable/*" element={<ManageTimetable />} />
         <Route path="reports/*" element={<AdminReports />} />
         <Route path="*" element={<DashboardHome />} />
         <Route path="leaves/*" element={<LeaveManagement />} />
