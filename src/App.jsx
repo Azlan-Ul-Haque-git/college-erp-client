@@ -7,25 +7,46 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Loader from "./components/Loader";
 import ProfileSettings from "./pages/ProfileSettings";
 import IDCard from "./pages/IDCard";
+import Register from "./pages/auth/Register";
+
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const FacultyDashboard = lazy(() => import("./pages/faculty/FacultyDashboard"));
-import Register from "./pages/auth/Register";
 const StudentDashboard = lazy(() => import("./pages/student/StudentDashboard"));
 
 export default function App() {
   const { user } = useAuth();
+
   return (
     <Suspense fallback={<Loader />}>
       <Routes>
-        <Route path="/login" element={!user ? <Login /> : <Navigate to={`/${user.role}/dashboard`} />} />
+        {/* Auth */}
+        <Route
+          path="/login"
+          element={!user ? <Login /> : <Navigate to={`/${user.role}/dashboard`} />}
+        />
         <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/admin/*" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
-        <Route path="/faculty/*" element={<ProtectedRoute role="faculty"><FacultyDashboard /></ProtectedRoute>} />
-        <Route path="/student/*" element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>} />
-        <Route path="/profile" element={user ? <ProfileSettings /> : <Navigate to="/login" />} />
-        <Route path="*" element={<Navigate to="/login" />} />
-        <Route path="/idcard" element={user ? <IDCard /> : <Navigate to="/login" />} />
         <Route path="/register" element={<Register />} />
+
+        {/* Role dashboards — nested routes are handled INSIDE each Dashboard component */}
+        <Route
+          path="/admin/*"
+          element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>}
+        />
+        <Route
+          path="/faculty/*"
+          element={<ProtectedRoute role="faculty"><FacultyDashboard /></ProtectedRoute>}
+        />
+        <Route
+          path="/student/*"
+          element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>}
+        />
+
+        {/* Shared pages */}
+        <Route path="/profile" element={user ? <ProfileSettings /> : <Navigate to="/login" />} />
+        <Route path="/idcard" element={user ? <IDCard /> : <Navigate to="/login" />} />
+
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </Suspense>
   );

@@ -1,227 +1,309 @@
-import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../utils/axiosInstance";
-import toast from "react-hot-toast";
 
-const SUBJECTS = ["Mathematics", "Physics", "Chemistry", "Computer Science", "English", "Data Structures", "DBMS", "Operating System", "Computer Networks", "Software Engineering"];
+const fmt = d => d ? new Date(d).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "—";
+const fmtDate = d => d ? new Date(d).toLocaleDateString("en-IN") : "—";
+
+const STATUS = {
+  present: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400",
+  absent: "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400",
+  late: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400",
+  pending: "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-400",
+};
+const APPROVAL = {
+  approved: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400",
+  rejected: "bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400",
+  pending: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400",
+  not_required: "bg-slate-100 text-slate-500 dark:bg-slate-700 dark:text-slate-400",
+};
 
 export default function StudentAttendance() {
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-  const [stream, setStream] = useState(null);
-  const [selfie, setSelfie] = useState(null);
-  const [location, setLocation] = useState(null);
-  const [locationError, setLocationError] = useState("");
-  const [subject, setSubject] = useState(SUBJECTS[0]);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [myRecords, setMyRecords] = useState([]);
-  const [cameraOn, setCameraOn] = useState(false);
+  const { user } = useAuth();
 
-  useEffect(() => {
-    fetchMyAttendance();
-    getLocation();
-  }, []);
+  const [today, setToday] = useState(null);
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [toast, setToast] = useState(null);
 
-  const fetchMyAttendance = async () => {
-    try {
-      const { data } = await api.get("/attendance/my");
-      setMyRecords(data.data || []);
-    } catch { }
+  const showToast = (msg, ok = true) => {
+    setToast({ msg, ok });
+    setTimeout(() => setToast(null), 3500);
   };
 
-  const getLocation = () => {
-    if (!navigator.geolocation) { setLocationError("GPS not supported"); return; }
-    navigator.geolocation.getCurrentPosition(
-      pos => setLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
-      () => setLocationError("Location access denied! Please allow location."),
-      { enableHighAccuracy: true }
+  // ── Fetch ─────────────────────────────────────────────────────────────────
+  const refresh = async () => {
+    try {
+      const [s, r] = await Promise.all([
+        api.get("/attendance/my-status"),
+        api.get("/attendance"),
+      ]);
+      setToday(s.data.data || null);
+      setRecords(r.data.data || []);
+    } catch {/* silently ignore */ }
+    finally { setLoading(false); }
+  };
+
+  useEffect(() => { refresh(); }, []);
+
+  // ── Actions ───────────────────────────────────────────────────────────────
+  const checkIn = async () => {
+    setActionLoading(true);
+    try {
+      const { data } = await api.post("/attendance/checkin");
+      setToday(data.data);
+      showToast("✅ Checked in! Awaiting admin approval.");
+    } catch (e) {
+      showToast(e.response?.data?.message || "Check-in failed", false);
+    } finally { setActionLoading(false); }
+  };
+
+  const checkOut = async () => {
+    setActionLoading(true);
+    try {
+      const { data } = await api.post("/attendance/checkout");
+      setToday(data.data);
+      showToast("✅ Checked out!");
+    } catch (e) {
+      showToast(e.response?.data?.message || "Check-out failed", false);
+    } finally { setActionLoading(false); }
+  };
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  const total = records.length;
+  const present = records.filter(r => r.status === "present").length;
+  const absent = records.filter(r => r.status === "absent").length;
+  const late = records.filter(r => r.status === "late").length;
+  const pct = total ? Math.round((present / total) * 100) : 0;
+
+  const checkedIn = !!today?.checkIn?.time;
+  const checkedOut = !!today?.checkOut?.time;
+  const approval = today?.approvalStatus;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-40 text-slate-400">
+        Loading attendance…
+      </div>
     );
-  };
-  const startCamera = async () => {
-    try {
-      const s = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
-        audio: false
-      });
-      setStream(s);
-      setCameraOn(true);
-      // Wait for video element to render then set stream
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = s;
-          videoRef.current.play();
-        }
-      }, 100);
-    } catch (err) {
-      setMessage("Camera access denied! Please allow camera permission.");
-      toast.error("Camera access denied!");
-    }
-  };
-  const stopCamera = () => {
-    if (stream) stream.getTracks().forEach(t => t.stop());
-    setStream(null);
-    setCameraOn(false);
-  };
-  const takeSelfie = () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas) { toast.error("Camera not ready!"); return; }
-    if (video.videoWidth === 0) { toast.error("Camera still loading, try again!"); return; }
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    canvas.getContext("2d").drawImage(video, 0, 0);
-    const img = canvas.toDataURL("image/jpeg", 0.7);
-    setSelfie(img);
-    stopCamera();
-  };
-
-  const submitAttendance = async () => {
-    if (!selfie) { toast.error("Take a selfie first!"); return; }
-    if (!location) { toast.error("Allow location first!"); return; }
-    setLoading(true); setMessage("");
-    try {
-      const { data } = await api.post("/attendance/student-checkin", {
-        selfie, latitude: location.latitude, longitude: location.longitude, subject,
-      });
-      setSuccess(true);
-      setMessage(data.message);
-      setSelfie(null);
-      toast.success("Attendance submitted! ✅");
-      fetchMyAttendance();
-    } catch (err) {
-      setSuccess(false);
-      setMessage(err.response?.data?.message || "Error occurred!");
-      toast.error(err.response?.data?.message || "Failed");
-    }
-    setLoading(false);
-  };
-
-  const presentCount = myRecords.filter(r => r.status === "present").length;
-  const totalCount = myRecords.filter(r => r.status !== "pending").length;
-  const percentage = totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : 0;
+  }
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-slate-800 dark:text-white">📍 Mark Attendance</h1>
+    <div className="space-y-4 sm:space-y-6 w-full max-w-3xl mx-auto px-2 sm:px-0">
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      {/* Toast */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg text-white text-sm font-semibold
+              ${toast.ok ? "bg-emerald-500" : "bg-red-500"}`}
+          >
+            {toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Page title */}
+      <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white">
+        📅 My Attendance
+      </h1>
+
+      {/* ── Check-in / Check-out card ─────────────────────────────────────── */}
+      <div className="card space-y-4">
+        {/* Date + approval badge */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <p className="font-semibold text-slate-700 dark:text-slate-200 text-sm sm:text-base">
+            Today — {fmtDate(new Date())}
+          </p>
+          {approval && approval !== "not_required" && (
+            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${APPROVAL[approval] || ""}`}>
+              {approval === "pending" && "⏳ Pending approval"}
+              {approval === "approved" && "✅ Approved"}
+              {approval === "rejected" && "❌ Rejected"}
+            </span>
+          )}
+        </div>
+
+        {/* Times row */}
+        <div className="flex flex-wrap items-center gap-4 sm:gap-8">
+          <TimeBlock label="Check-in" value={checkedIn ? fmt(today.checkIn.time) : "—"} active={checkedIn} color="text-emerald-500" />
+          <span className="text-slate-300 dark:text-slate-600 text-xl hidden sm:block">→</span>
+          <TimeBlock label="Check-out" value={checkedOut ? fmt(today.checkOut.time) : "—"} active={checkedOut} color="text-violet-500" />
+          {today?.workingHours && (
+            <>
+              <span className="text-slate-300 dark:text-slate-600 text-xl hidden sm:block">·</span>
+              <TimeBlock label="Hours" value={`${today.workingHours}h`} active color="text-amber-500" />
+            </>
+          )}
+        </div>
+
+        {/* Buttons */}
+        <div className="flex flex-col xs:flex-row gap-2 sm:gap-3">
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            disabled={checkedIn || actionLoading}
+            onClick={checkIn}
+            className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-all
+              ${checkedIn
+                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 cursor-default"
+                : "bg-emerald-500 hover:bg-emerald-600 text-white"
+              } disabled:opacity-60`}
+          >
+            {actionLoading && !checkedIn ? "…" : checkedIn ? "✅ Checked In" : "🟢 Check In"}
+          </motion.button>
+
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            disabled={!checkedIn || checkedOut || actionLoading}
+            onClick={checkOut}
+            className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-all
+              ${checkedOut
+                ? "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400 cursor-default"
+                : !checkedIn
+                  ? "bg-slate-100 text-slate-400 dark:bg-slate-700 dark:text-slate-500 cursor-not-allowed"
+                  : "bg-violet-500 hover:bg-violet-600 text-white"
+              } disabled:opacity-60`}
+          >
+            {actionLoading && checkedIn && !checkedOut ? "…" : checkedOut ? "✅ Checked Out" : "🔴 Check Out"}
+          </motion.button>
+        </div>
+
+        {/* Rejection reason */}
+        {approval === "rejected" && today?.rejectionReason && (
+          <p className="text-xs text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 px-3 py-2 rounded-lg">
+            Rejection reason: {today.rejectionReason}
+          </p>
+        )}
+      </div>
+
+      {/* ── Stats ────────────────────────────────────────────────────────── */}
+      <div
+        className="grid gap-3"
+        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 130px), 1fr))" }}
+      >
         {[
-          { label: "Present", value: presentCount, color: "text-green-600" },
-          { label: "Percentage", value: `${percentage}%`, color: "text-blue-600" },
-          { label: "Total", value: myRecords.length, color: "text-purple-600" },
+          { label: "Total", value: total, icon: "📚", cls: "text-slate-800 dark:text-white" },
+          { label: "Present", value: present, icon: "✅", cls: "text-emerald-600 dark:text-emerald-400" },
+          { label: "Absent", value: absent, icon: "❌", cls: "text-red-500 dark:text-red-400" },
+          { label: "Late", value: late, icon: "⏰", cls: "text-amber-600 dark:text-amber-400" },
         ].map(s => (
-          <div key={s.label} className="card text-center">
-            <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
-            <p className="text-slate-400 text-xs">{s.label}</p>
-          </div>
+          <motion.div
+            key={s.label}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="card text-center py-3 px-2"
+          >
+            <p className="text-xl mb-0.5">{s.icon}</p>
+            <p className={`text-2xl font-bold ${s.cls}`}>{s.value}</p>
+            <p className="text-xs text-slate-400 mt-0.5">{s.label}</p>
+          </motion.div>
         ))}
       </div>
 
-      {/* Attendance Form */}
-      <div className="card space-y-4">
-        {/* Location */}
-        <div className={`flex items-center gap-3 p-3 rounded-xl ${location ? "bg-green-50 dark:bg-green-900/20" : "bg-red-50 dark:bg-red-900/20"}`}>
-          <span>{location ? "✅" : "❌"}</span>
-          <p className={`text-sm flex-1 ${location ? "text-green-700" : "text-red-600"}`}>
-            {location ? `Location: ${location.latitude.toFixed(4)}, ${location.longitude.toFixed(4)}` : locationError || "Getting location..."}
+      {/* Attendance % progress bar */}
+      <div className="card space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className="font-semibold text-slate-700 dark:text-slate-300">Overall Attendance</span>
+          <span className={`font-bold ${pct >= 75 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}`}>
+            {pct}%
+          </span>
+        </div>
+        <div className="h-2.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className={`h-full rounded-full ${pct >= 75 ? "bg-emerald-500" : "bg-red-500"}`}
+          />
+        </div>
+        {pct < 75 && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20
+                        px-3 py-2 rounded-lg">
+            ⚠️ Below 75%. Need {Math.ceil((0.75 * total - present) / 0.25)} more present days.
           </p>
-          {!location && (
-            <button onClick={getLocation} className="text-xs bg-blue-500 text-white px-3 py-1.5 rounded-xl">
-              Retry
-            </button>
-          )}
-        </div>
-
-        {/* Subject */}
-        <div>
-          <label className="text-xs font-medium text-slate-500 mb-1 block">Subject *</label>
-          <select value={subject} onChange={e => setSubject(e.target.value)} className="input">
-            {SUBJECTS.map(s => <option key={s}>{s}</option>)}
-          </select>
-        </div>
-
-        {/* Camera */}
-        <div>
-          {!cameraOn && !selfie && (
-            <motion.button whileTap={{ scale: 0.97 }} onClick={startCamera}
-              className="w-full btn-primary py-3">
-              📷 Open Camera
-            </motion.button>
-          )}
-          {cameraOn && (
-            <div className="text-center space-y-3">
-              <video ref={videoRef} autoPlay playsInline muted
-                onLoadedMetadata={() => videoRef.current?.play()}
-                className="w-full max-w-xs mx-auto rounded-2xl border-4 border-purple-200" />
-              <canvas ref={canvasRef} className="hidden" />
-              <div className="flex gap-3 justify-center">
-                <motion.button whileTap={{ scale: 0.95 }} onClick={takeSelfie}
-                  className="bg-green-600 text-white px-6 py-2.5 rounded-xl font-semibold">
-                  📸 Take Selfie
-                </motion.button>
-                <button onClick={stopCamera}
-                  className="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-white px-6 py-2.5 rounded-xl">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )}
-          {selfie && (
-            <div className="text-center space-y-2">
-              <img src={selfie} alt="selfie"
-                className="w-32 h-32 object-cover rounded-full mx-auto border-4 border-green-400 shadow-lg" />
-              <p className="text-green-600 font-semibold text-sm">✅ Selfie ready!</p>
-              <button onClick={() => { setSelfie(null); startCamera(); }}
-                className="text-xs text-blue-500 hover:underline">
-                Retake
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Message */}
-        {message && (
-          <div className={`p-3 rounded-xl text-sm ${success ? "bg-green-50 text-green-700 dark:bg-green-900/20" : "bg-red-50 text-red-700 dark:bg-red-900/20"}`}>
-            {message}
-          </div>
-        )}
-
-        {/* Submit */}
-        <motion.button whileTap={{ scale: 0.97 }}
-          onClick={submitAttendance}
-          disabled={loading || !selfie || !location}
-          className="w-full btn-primary py-3 text-base disabled:opacity-50">
-          {loading ? "Submitting..." : "✅ Submit Attendance"}
-        </motion.button>
-      </div>
-
-      {/* History */}
-      <div className="card">
-        <h3 className="font-semibold dark:text-white mb-4">Attendance History</h3>
-        {myRecords.length === 0 ? (
-          <p className="text-slate-400 text-center py-4">No records yet</p>
-        ) : (
-          <div className="space-y-2">
-            {myRecords.slice(0, 15).map(r => (
-              <div key={r._id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                <div>
-                  <p className="font-medium text-sm dark:text-white">{r.subject}</p>
-                  <p className="text-xs text-slate-400">{r.date}</p>
-                </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-bold ${r.status === "present" ? "bg-green-100 text-green-700"
-                  : r.status === "absent" ? "bg-red-100 text-red-700"
-                    : "bg-yellow-100 text-yellow-700"
-                  }`}>
-                  {r.status === "present" ? "✅ Present" : r.status === "absent" ? "❌ Absent" : "⏳ Pending"}
-                </span>
-              </div>
-            ))}
-          </div>
         )}
       </div>
+
+      {/* ── History table ─────────────────────────────────────────────────── */}
+      <div className="card overflow-hidden p-0">
+        <h2 className="text-base font-semibold text-slate-700 dark:text-slate-200 p-4 border-b
+                        border-slate-100 dark:border-slate-700">
+          Attendance History
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs sm:text-sm min-w-[480px]">
+            <thead className="bg-slate-50 dark:bg-slate-800/50">
+              <tr>
+                {["Date", "Subject", "Status", "Check-in", "Check-out", "Approval"].map(h => (
+                  <th key={h} className="px-3 sm:px-4 py-2.5 text-left font-semibold
+                                          text-slate-400 dark:text-slate-500 uppercase text-xs tracking-wide">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
+              {records.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-10 text-slate-400 text-sm">
+                    No attendance records yet
+                  </td>
+                </tr>
+              ) : records.map((r, i) => (
+                <tr key={r._id || i}
+                  className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
+                  <td className="px-3 sm:px-4 py-2.5 whitespace-nowrap text-slate-600 dark:text-slate-400">
+                    {fmtDate(r.date)}
+                  </td>
+                  <td className="px-3 sm:px-4 py-2.5 text-slate-700 dark:text-slate-300 max-w-[120px] truncate">
+                    {r.subject || r.course || "—"}
+                  </td>
+                  <td className="px-3 sm:px-4 py-2.5">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize
+                      ${STATUS[r.status] || STATUS.pending}`}>
+                      {r.status}
+                    </span>
+                  </td>
+                  <td className="px-3 sm:px-4 py-2.5 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                    {r.checkIn?.time ? fmt(r.checkIn.time) : "—"}
+                  </td>
+                  <td className="px-3 sm:px-4 py-2.5 text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                    {r.checkOut?.time ? fmt(r.checkOut.time) : "—"}
+                  </td>
+                  <td className="px-3 sm:px-4 py-2.5">
+                    {r.approvalStatus && r.approvalStatus !== "not_required" ? (
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-semibold capitalize
+                        ${APPROVAL[r.approvalStatus] || ""}`}>
+                        {r.approvalStatus}
+                      </span>
+                    ) : (
+                      <span className="text-slate-300 dark:text-slate-600">—</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Sub-component ─────────────────────────────────────────────────────────────
+function TimeBlock({ label, value, active, color }) {
+  return (
+    <div className="flex flex-col items-center min-w-[56px]">
+      <p className="text-xs text-slate-400 uppercase tracking-wide font-semibold">{label}</p>
+      <p className={`font-bold mt-0.5 ${active ? color : "text-slate-300 dark:text-slate-600"}
+                    text-lg sm:text-xl`}>
+        {value}
+      </p>
     </div>
   );
 }

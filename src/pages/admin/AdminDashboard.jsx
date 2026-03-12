@@ -3,7 +3,10 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "../../components/Layout";
 import StatCard from "../../components/StatCard";
 import { motion } from "framer-motion";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from "recharts";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, PieChart, Pie, Cell,
+} from "recharts";
 import { UsersIcon, AcademicCapIcon, BanknotesIcon, BellIcon } from "@heroicons/react/24/outline";
 import api from "../../utils/axiosInstance";
 import ManageStudents from "./ManageStudents";
@@ -15,12 +18,13 @@ import ExamManagement from "./ExamManagement";
 import GrievanceManagement from "./GrievanceManagement";
 import ManageTimetable from "./ManageTimetable";
 import RegistrationRequests from "./RegistrationRequests";
+import AttendanceApprovals from "./AttendanceApprovals";  // ✅ already here
 
 const COLORS = ["#7c3aed", "#2563eb", "#059669", "#f59e0b"];
 
+// ── Dashboard Home ────────────────────────────────────────────────────────────
 function DashboardHome() {
   const [stats, setStats] = useState({ students: 0, faculty: 0 });
-  const [attendance, setAttendance] = useState([]);
   const [facultyAttendance, setFacultyAttendance] = useState([]);
 
   useEffect(() => {
@@ -46,6 +50,7 @@ function DashboardHome() {
         <p className="text-slate-500 text-sm mt-1">Welcome back! Here's what's happening today.</p>
       </motion.div>
 
+      {/* Stat cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <StatCard title="Total Students" value={stats.students || "0"} subtitle="+12 this month" icon={AcademicCapIcon} color="from-violet-500 to-purple-600" delay={0} />
         <StatCard title="Total Faculty" value={stats.faculty || "0"} subtitle="8 departments" icon={UsersIcon} color="from-blue-500 to-cyan-600" delay={0.1} />
@@ -53,6 +58,7 @@ function DashboardHome() {
         <StatCard title="Active Notices" value="14" subtitle="3 urgent" icon={BellIcon} color="from-orange-500 to-amber-600" delay={0.3} />
       </div>
 
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="card">
           <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Monthly Fee Collection (₹)</h3>
@@ -88,7 +94,7 @@ function DashboardHome() {
         </motion.div>
       </div>
 
-      {/* Faculty Attendance Records */}
+      {/* Faculty attendance today */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="card">
         <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Faculty Attendance Today</h3>
         {facultyAttendance.length === 0 ? (
@@ -111,9 +117,8 @@ function DashboardHome() {
   );
 }
 
-// Admin Attendance Reports Page
+// ── Admin Attendance Reports ───────────────────────────────────────────────────
 function AdminAttendance() {
-  const [studentAttendance, setStudentAttendance] = useState([]);
   const [facultyAttendance, setFacultyAttendance] = useState([]);
   const [tab, setTab] = useState("student");
 
@@ -124,11 +129,15 @@ function AdminAttendance() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Attendance Reports</h1>
-      <div className="flex gap-2">
-        <button onClick={() => setTab("student")} className={`px-4 py-2 rounded-xl font-semibold text-sm ${tab === "student" ? "bg-purple-600 text-white" : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-white"}`}>
+      <div className="flex gap-2 flex-wrap">
+        <button onClick={() => setTab("student")}
+          className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all
+            ${tab === "student" ? "bg-purple-600 text-white" : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-white"}`}>
           👨‍🎓 Students
         </button>
-        <button onClick={() => setTab("faculty")} className={`px-4 py-2 rounded-xl font-semibold text-sm ${tab === "faculty" ? "bg-purple-600 text-white" : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-white"}`}>
+        <button onClick={() => setTab("faculty")}
+          className={`px-4 py-2 rounded-xl font-semibold text-sm transition-all
+            ${tab === "faculty" ? "bg-purple-600 text-white" : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-white"}`}>
           👨‍🏫 Faculty
         </button>
       </div>
@@ -141,23 +150,30 @@ function AdminAttendance() {
           </div>
         ) : (
           <div>
-            <h3 className="font-semibold dark:text-white mb-4">Faculty Attendance Records ({facultyAttendance.length})</h3>
+            <h3 className="font-semibold dark:text-white mb-4">
+              Faculty Attendance Records ({facultyAttendance.length})
+            </h3>
             {facultyAttendance.length === 0 ? (
               <p className="text-slate-400 text-sm text-center py-8">No faculty attendance records found</p>
             ) : (
-              <div className="space-y-2">
-                {facultyAttendance.map((r, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl">
-                    <div>
-                      <p className="font-medium text-sm dark:text-white">{r.faculty?.name || "Faculty"}</p>
-                      <p className="text-xs text-slate-400">{r.faculty?.email}</p>
+              <div className="overflow-x-auto">
+                <div className="space-y-2 min-w-[360px]">
+                  {facultyAttendance.map((r, i) => (
+                    <div key={i} className="flex items-center justify-between p-3
+                                            bg-slate-50 dark:bg-slate-700/50 rounded-xl">
+                      <div>
+                        <p className="font-medium text-sm dark:text-white">{r.faculty?.name || "Faculty"}</p>
+                        <p className="text-xs text-slate-400">{r.faculty?.email}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-slate-400">{r.date}</p>
+                        <p className="text-xs text-green-600">
+                          ⏰ {r.checkinTime ? new Date(r.checkinTime).toLocaleTimeString() : "N/A"}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-slate-400">{r.date}</p>
-                      <p className="text-xs text-green-600">⏰ {r.checkinTime ? new Date(r.checkinTime).toLocaleTimeString() : "N/A"}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -167,7 +183,7 @@ function AdminAttendance() {
   );
 }
 
-// Admin Marks Page
+// ── Admin Marks ───────────────────────────────────────────────────────────────
 function AdminMarks() {
   const [students, setStudents] = useState([]);
   useEffect(() => {
@@ -177,23 +193,27 @@ function AdminMarks() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Marks Overview</h1>
-      <div className="card">
-        <h3 className="font-semibold dark:text-white mb-4">All Students ({students.length})</h3>
+      <div className="card overflow-hidden p-0">
+        <div className="p-4 border-b border-slate-100 dark:border-slate-700">
+          <h3 className="font-semibold dark:text-white">All Students ({students.length})</h3>
+        </div>
         {students.length === 0 ? (
           <p className="text-slate-400 text-center py-8">No students found</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[480px]">
               <thead className="bg-slate-50 dark:bg-slate-700/50">
                 <tr>
                   {["Name", "Roll No", "Branch", "Year", "Semester"].map(h => (
-                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">{h}</th>
+                    <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {students.map((s, i) => (
-                  <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
+                  <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                     <td className="px-4 py-3 font-medium dark:text-white">{s.user?.name}</td>
                     <td className="px-4 py-3 text-slate-500">{s.rollNo}</td>
                     <td className="px-4 py-3 text-slate-500">{s.branch}</td>
@@ -210,7 +230,7 @@ function AdminMarks() {
   );
 }
 
-// Admin Reports Page
+// ── Admin Reports ─────────────────────────────────────────────────────────────
 function AdminReports() {
   const [stats, setStats] = useState({ students: 0, faculty: 0 });
   useEffect(() => {
@@ -222,11 +242,11 @@ function AdminReports() {
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Reports</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="card text-center">
+        <div className="card text-center py-6">
           <p className="text-4xl font-bold text-purple-600">{stats.students}</p>
           <p className="text-slate-500 mt-1">Total Students</p>
         </div>
-        <div className="card text-center">
+        <div className="card text-center py-6">
           <p className="text-4xl font-bold text-blue-600">{stats.faculty}</p>
           <p className="text-slate-500 mt-1">Total Faculty</p>
         </div>
@@ -251,25 +271,29 @@ function AdminReports() {
   );
 }
 
+// ── Main export ───────────────────────────────────────────────────────────────
 export default function AdminDashboard() {
   return (
     <Layout>
       <Routes>
+        {/* ✅ FIXED: duplicate <Route path="timetable/*"> removed */}
+        {/* ✅ FIXED: <Route path="*"> moved to the end so it doesn't swallow other routes */}
         <Route path="dashboard" element={<DashboardHome />} />
         <Route path="students/*" element={<ManageStudents />} />
         <Route path="faculty/*" element={<ManageFaculty />} />
         <Route path="fees/*" element={<ManageFees />} />
         <Route path="notices/*" element={<ManageNotices />} />
         <Route path="attendance/*" element={<AdminAttendance />} />
+        <Route path="attendance-approvals" element={<AttendanceApprovals />} />
         <Route path="marks/*" element={<AdminMarks />} />
         <Route path="timetable/*" element={<ManageTimetable />} />
-        <Route path="reports/*" element={<AdminReports />} />
-        <Route path="*" element={<DashboardHome />} />
         <Route path="leaves/*" element={<LeaveManagement />} />
         <Route path="exams/*" element={<ExamManagement />} />
         <Route path="grievances/*" element={<GrievanceManagement />} />
-        <Route path="timetable/*" element={<ManageTimetable />} />
         <Route path="registrations/*" element={<RegistrationRequests />} />
+        <Route path="reports/*" element={<AdminReports />} />
+        {/* Catch-all LAST — warna sab routes yahan aa jaate */}
+        <Route path="*" element={<DashboardHome />} />
       </Routes>
     </Layout>
   );
