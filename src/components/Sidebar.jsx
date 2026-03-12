@@ -20,6 +20,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
+
 const MENUS = {
   admin: [
     { label: "Dashboard", path: "/admin/dashboard", icon: HomeIcon },
@@ -69,6 +70,7 @@ const MENUS = {
     { label: "Chat", path: "/student/chat", icon: ChatBubbleLeftRightIcon },
     { label: "ID Card", path: "/idcard", icon: UserCircleIcon },
     { label: "Settings", path: "/profile", icon: UserCircleIcon },
+    { label: "RGPV Updates", path: "/student/rgpv-updates", icon: BellIcon },
   ],
 };
 

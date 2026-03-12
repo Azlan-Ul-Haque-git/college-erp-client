@@ -19,6 +19,7 @@ import ExamSchedule from "./ExamSchedule";
 import GrievancePortal from "./GrievancePortal";
 import StudyMaterial from "./StudyMaterial";
 import StudentAssignments from "./StudentAssignments";
+import RGPVUpdates from "./RGPVUpdates";
 
 function StudentTimetable() {
   const [timetable, setTimetable] = useState([]);
@@ -443,6 +444,7 @@ export default function StudentDashboard() {
         <Route path="study-material" element={<StudyMaterial />} />
         <Route path="assignments" element={<StudentAssignments />} />
       </Routes>
+      <Route path="rgpv-updates" element={<RGPVUpdates />} />
     </Layout>
   );
 }
