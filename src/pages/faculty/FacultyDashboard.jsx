@@ -54,115 +54,74 @@ function FacultyNotices() {
   );
 }
 
-/* ---------------------- FACULTY CHAT ---------------------- */
-
 function FacultyChat() {
-
-  const { user } = useAuth();
 
   const [users, setUsers] = useState([]);
   const [selected, setSelected] = useState(null);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
-  const [unread, setUnread] = useState({});
-  const [onlineUsers, setOnlineUsers] = useState([]);
-
-  const messagesEndRef = useRef(null);
-
-  /* JOIN SOCKET */
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (user?._id) {
-      socket.emit("join", user._id);
-    }
-  }, [user]);
-
-  /* LOAD CHAT USERS */
-
-  useEffect(() => {
-    api.get("/chat/users")
-      .then(r => setUsers(r.data.users || []))
-      .catch(() => { });
+    api.get("/chat/users").then(r => setUsers(r.data.users || [])).catch(() => { });
   }, []);
 
-  /* RECEIVE REALTIME MESSAGE */
-
+  // realtime messages
   useEffect(() => {
 
-    socket.on("receiveMessage", (msg) => {
+    socket.on("chat:message", (msg) => {
 
-      if (msg.sender === selected?._id) {
+      if (
+        msg.sender?._id === selected?._id ||
+        msg.receiver === selected?._id
+      ) {
         setMessages(prev => [...prev, msg]);
       }
-      else {
-        setUnread(prev => ({
-          ...prev,
-          [msg.sender]: (prev[msg.sender] || 0) + 1
-        }));
-      }
 
     });
 
-    socket.on("onlineUsers", (list) => {
-      setOnlineUsers(list);
-    });
-
-    return () => {
-      socket.off("receiveMessage");
-      socket.off("onlineUsers");
-    };
+    return () => socket.off("chat:message");
 
   }, [selected]);
-
-  /* AUTO SCROLL */
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  /* OPEN CHAT */
 
   const openChat = async (u) => {
 
     setSelected(u);
-    setUnread(p => ({ ...p, [u._id]: 0 }));
+    setMessages([]);
+
+    const roomId = [user._id, u._id].sort().join("_");
+
+    socket.emit("chat:join", roomId);
 
     try {
-      const { data } = await api.get(`/ chat / ${u._id} `);
+      const { data } = await api.get(`/chat/${u._id}`);
       setMessages(data.messages || []);
     } catch { }
 
   };
 
-  /* SEND MESSAGE */
-
   const sendMsg = () => {
 
     if (!text.trim() || !selected) return;
 
-    const msg = {
-      sender: user._id,
-      receiver: selected._id,
-      content: text,
-      createdAt: new Date()
-    };
+    socket.emit("chat:message", {
+      senderId: user._id,
+      receiverId: selected._id,
+      content: text
+    });
 
-    socket.emit("sendMessage", msg);
-
-    setMessages(prev => [...prev, msg]);
     setText("");
 
   };
 
   return (
-
     <div className="space-y-4">
 
-      <h1 className="text-2xl font-bold text-slate-800 dark:text-white">💬 Chat</h1>
+      <h1 className="text-2xl font-bold dark:text-white">
+        💬 Chat
+      </h1>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4" style={{ height: "600px" }}>
-
-        {/* USER LIST */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[600px]">
 
         <div className="card overflow-y-auto">
 
@@ -171,22 +130,17 @@ function FacultyChat() {
             <div
               key={u._id}
               onClick={() => openChat(u)}
-              className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:bg-slate-50"
+              className="flex items-center gap-3 p-3 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl"
             >
 
-              <div className="w-9 h-9 bg-purple-600 rounded-full text-white flex items-center justify-center">
-                {u.name?.[0]}
+              <div className="w-9 h-9 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                {u.name?.[0]?.toUpperCase()}
               </div>
 
-              <div className="flex-1">
-                <p className="text-sm font-medium">{u.name}</p>
+              <div>
+                <p className="text-sm font-medium dark:text-white">{u.name}</p>
+                <p className="text-xs text-slate-400">{u.role}</p>
               </div>
-
-              {unread[u._id] > 0 && (
-                <span className="bg-purple-600 text-white text-xs px-2 rounded-full">
-                  {unread[u._id]}
-                </span>
-              )}
 
             </div>
 
@@ -194,93 +148,64 @@ function FacultyChat() {
 
         </div>
 
-        {/* CHAT WINDOW */}
-
-        <div className="md:col-span-2 card flex flex-col">
+        <div className="lg:col-span-2 card flex flex-col">
 
           {selected ? (
-
             <>
-              <div className="border-b pb-2 mb-2">
-
-                <p className="font-semibold">{selected.name}</p>
-
-                <p className={`text - xs ${onlineUsers.includes(selected._id)
-                  ? "text-green-500"
-                  : "text-gray-400"
-                  } `}>
-                  ● {onlineUsers.includes(selected._id) ? "Online" : "Offline"}
-                </p>
-
+              <div className="border-b pb-3 mb-3 dark:border-slate-700">
+                <p className="font-semibold dark:text-white">{selected.name}</p>
               </div>
 
-              <div className="flex-1 overflow-y-auto space-y-2">
+              <div className="flex-1 overflow-y-auto space-y-2 mb-3">
 
-                {messages.map((m, i) => {
+                {messages.map((m, i) => (
 
-                  const isMe =
-                    m.sender === user._id ||
-                    m.sender?._id === user._id;
-
-                  return (
+                  <div
+                    key={i}
+                    className={`flex ${m.sender?._id === user._id
+                      ? "justify-end"
+                      : "justify-start"
+                      }`}
+                  >
 
                     <div
-                      key={i}
-                      className={`flex ${isMe ? "justify-end" : "justify-start"} `}
-                    >
-
-                      <div className={`px - 3 py - 2 rounded - xl text - sm ${isMe
+                      className={`px-3 py-2 rounded-xl text-sm ${m.sender?._id === user._id
                         ? "bg-purple-600 text-white"
-                        : "bg-slate-200"
-                        } `}>
-
-                        {m.content}
-
-                        {isMe && (
-                          <span className="ml-2 text-xs">
-                            {m.isRead ? "✓✓" : "✓"}
-                          </span>
-                        )}
-
-                      </div>
-
+                        : "bg-slate-200 dark:bg-slate-700 dark:text-white"
+                        }`}
+                    >
+                      {m.content}
                     </div>
 
-                  );
+                  </div>
 
-                })}
-
-                <div ref={messagesEndRef} />
+                ))}
 
               </div>
 
-              <div className="flex gap-2 mt-2">
+              <div className="flex gap-2">
 
                 <input
                   value={text}
                   onChange={e => setText(e.target.value)}
                   onKeyDown={e => e.key === "Enter" && sendMsg()}
-                  className="flex-1 border rounded-lg px-3 py-2"
+                  className="flex-1 border rounded-xl px-3 py-2 text-sm"
                   placeholder="Type message..."
                 />
 
                 <button
                   onClick={sendMsg}
-                  className="bg-purple-600 text-white px-4 py-2 rounded-lg"
+                  className="bg-purple-600 text-white px-4 py-2 rounded-xl"
                 >
                   Send
                 </button>
 
               </div>
-
             </>
-
           ) : (
-
-            <div className="flex items-center justify-center h-full text-gray-400">
+            <p className="text-center text-slate-400">
               Select a student to chat
-            </div>
-
+            </p>
           )}
 
         </div>
@@ -288,10 +213,8 @@ function FacultyChat() {
       </div>
 
     </div>
-
   );
 }
-
 /* ---------------------- DASHBOARD ---------------------- */
 
 function FacultyHome() {
