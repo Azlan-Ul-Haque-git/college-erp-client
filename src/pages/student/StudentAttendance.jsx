@@ -41,81 +41,82 @@ export default function StudentAttendance() {
 
 
   /* FACE + LOCATION CHECKIN */
-
-  const checkIn = async () => {
-
+  const checkIn = () => {
     setActionLoading(true);
 
-    try {
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
 
-      if (!navigator.geolocation) {
-        showToast("Location not supported", false);
-        return;
-      }
+          const stream =
+            await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: "user"
+              }
+            });
 
-      navigator.geolocation.getCurrentPosition(async (pos) => {
+          const video = document.createElement("video");
+          video.srcObject = stream;
+          await video.play();
 
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
 
-        /* camera open */
+          canvas.getContext("2d").drawImage(video, 0, 0);
 
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          const image =
+            canvas.toDataURL("image/jpeg");
 
-        const video = document.createElement("video");
-        video.srcObject = stream;
+          stream.getTracks().forEach(t => t.stop());
 
-        await video.play();
+          const { data } =
+            await api.post("/attendance/checkin", {
+              lat,
+              lng,
+              image
+            });
 
-        const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+          setToday(data.data);
+          refresh();
+          showToast(data.message);
 
-        canvas.getContext("2d").drawImage(video, 0, 0);
+        } catch (err) {
+          showToast(
+            err.response?.data?.message ||
+            "Check-in failed",
+            false
+          );
+        }
 
-        const image = canvas.toDataURL("image/jpeg");
+        setActionLoading(false);
+      },
 
-        stream.getTracks().forEach(t => t.stop());
+      () => {
+        showToast("Location denied", false);
+        setActionLoading(false);
+      },
 
-        /* send to backend */
-
-        const { data } = await api.post("/attendance/checkin", {
-          lat,
-          lng,
-          image
-        });
-
-        setToday(data.data);
-
-        showToast("✅ Face verified & attendance marked");
-
-      });
-
-    } catch (err) {
-
-      showToast(err.response?.data?.message || "Check-in failed", false);
-
-    }
-    finally {
-      setActionLoading(false);
-    }
-
+      { enableHighAccuracy: true }
+    );
   };
 
-
   /* FACE CHECKOUT */
-
   const checkOut = async () => {
-
     setActionLoading(true);
 
     try {
-
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const stream =
+        await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user"
+          }
+        });
 
       const video = document.createElement("video");
       video.srcObject = stream;
-
       await video.play();
 
       const canvas = document.createElement("canvas");
@@ -128,24 +129,23 @@ export default function StudentAttendance() {
 
       stream.getTracks().forEach(t => t.stop());
 
-      const { data } = await api.post("/attendance/checkout", { image });
+      const { data } =
+        await api.post("/attendance/checkout", { image });
 
       setToday(data.data);
-
-      showToast("✅ Checked out");
+      refresh();
+      showToast(data.message);
 
     } catch (err) {
-
-      showToast(err.response?.data?.message || "Checkout failed", false);
-
+      showToast(
+        err.response?.data?.message ||
+        "Checkout failed",
+        false
+      );
     }
-    finally {
-      setActionLoading(false);
-    }
 
+    setActionLoading(false);
   };
-
-
   const checkedIn = !!today?.checkIn?.time;
   const checkedOut = !!today?.checkOut?.time;
 

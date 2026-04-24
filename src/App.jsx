@@ -8,6 +8,7 @@ import Loader from "./components/Loader";
 import ProfileSettings from "./pages/ProfileSettings";
 import IDCard from "./pages/IDCard";
 import Register from "./pages/auth/Register";
+import StudentLeaveApplication from "./pages/student/LeaveApplication";
 
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const FacultyDashboard = lazy(() => import("./pages/faculty/FacultyDashboard"));
@@ -47,6 +48,7 @@ export default function App() {
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="/student/leaves" element={<StudentLeaveApplication />} />
       </Routes>
     </Suspense>
   );

@@ -10,7 +10,7 @@ export default function RGPVUpdates() {
         const load = async () => {
 
             try {
-                const { data } = await api.get("/notifications/rgpv");
+                const { data } = await api.get("/rgpv");
                 setNotices(data.data || []);
             } catch { }
 

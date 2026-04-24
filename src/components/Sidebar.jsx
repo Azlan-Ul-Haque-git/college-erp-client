@@ -49,7 +49,7 @@ const MENUS = {
     { label: "Assignments", path: "/faculty/assignments", icon: ClipboardDocumentListIcon },
     { label: "Notes", path: "/faculty/notes", icon: AcademicCapIcon },
     { label: "Notices", path: "/faculty/notices", icon: BellIcon },
-    { label: "Leave", path: "/faculty/leaves", icon: CalendarIcon },
+    { label: "Student Leaves", path: "/faculty/leaves", icon: CalendarIcon },
     { label: "Chat", path: "/faculty/chat", icon: ChatBubbleLeftRightIcon },
     { label: "ID Card", path: "/idcard", icon: UserCircleIcon },
     { label: "Settings", path: "/profile", icon: UserCircleIcon },
@@ -176,16 +176,17 @@ export default function Sidebar() {
   return (
     <>
       {/* ── Mobile top bar ──────────────────────────────────────────────────── */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 h-16
-        bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl
-        border-b border-slate-200/60 dark:border-slate-700/60
-        flex items-center justify-between px-4 shadow-sm">
-
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40
+pt-[max(10px,env(safe-area-inset-top))]
+pb-2 px-4 min-h-[72px]
+bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl
+border-b border-slate-200/60 dark:border-slate-700/60
+flex items-center justify-between shadow-sm">
         {/* Hamburger */}
         <motion.button
           whileTap={{ scale: 0.92 }}
           onClick={() => setOpen(true)}
-          className={`w-10 h-10 rounded-2xl bg-gradient-to-br ${rc.color}
+          className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${rc.color}
             flex items-center justify-center shadow-lg shadow-purple-500/20`}
         >
           <Bars3Icon className="w-5 h-5 text-white" />
@@ -201,7 +202,7 @@ export default function Sidebar() {
         </div>
 
         {/* Avatar */}
-        <div className="w-9 h-9 rounded-xl overflow-hidden ring-2 ring-offset-1 ring-slate-200 dark:ring-slate-600">
+        <div className="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-offset-1 ring-slate-200 dark:ring-slate-600">
           {user?.avatar ? (
             <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
           ) : (

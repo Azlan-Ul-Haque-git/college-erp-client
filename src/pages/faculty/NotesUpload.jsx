@@ -23,7 +23,7 @@ export default function NotesUpload() {
 
   const handleFileUpload = async (file) => {
     if (!file) return;
-    const maxSize = 50 * 1024 * 1024; // 50MB
+    const maxSize = 25 * 1024 * 1024; // 25MB
     if (file.size > maxSize) { toast.error("File too large! Max 50MB"); return; }
     setUploading(true);
     try {
