@@ -9,6 +9,8 @@ import { useAuth } from "../../context/AuthContext";
 import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer } from "recharts";
 import { ClipboardDocumentListIcon, ChartBarIcon, BanknotesIcon, AcademicCapIcon } from "@heroicons/react/24/outline";
 import api from "../../utils/axiosInstance";
+import socket from
+  "../../utils/socket";
 import ViewAttendance from "./ViewAttendance";
 import ViewMarks from "./ViewMarks";
 import ViewFees from "./ViewFees";
@@ -20,6 +22,8 @@ import GrievancePortal from "./GrievancePortal";
 import StudyMaterial from "./StudyMaterial";
 import StudentAssignments from "./StudentAssignments";
 import RGPVUpdates from "./RGPVUpdates";
+import LeaveApplication from "./LeaveApplication";
+
 
 function StudentTimetable() {
   const [timetable, setTimetable] = useState([]);
@@ -438,6 +442,7 @@ export default function StudentDashboard() {
         <Route path="ai" element={<AIPrediction />} />
         <Route path="result" element={<ResultCard />} />
         <Route path="exam-schedule" element={<ExamSchedule />} />
+        <Route path="leaves" element={<LeaveApplication />} />
         <Route path="grievance" element={<GrievancePortal />} />
         <Route path="study-material" element={<StudyMaterial />} />
         <Route path="assignments" element={<StudentAssignments />} />
