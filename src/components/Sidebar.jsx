@@ -60,6 +60,7 @@ const MENUS = {
     { label: "Marks", path: "/student/marks", icon: ChartBarIcon },
     { label: "Fees", path: "/student/fees", icon: BanknotesIcon },
     { label: "Timetable", path: "/student/timetable", icon: CalendarIcon },
+    { label: "Leave", path: "/student/leaves", icon: CalendarIcon },
     { label: "Assignments", path: "/student/assignments", icon: ClipboardDocumentListIcon },
     { label: "Study Material", path: "/student/study-material", icon: AcademicCapIcon },
     { label: "Exam Schedule", path: "/student/exam-schedule", icon: CalendarIcon },
