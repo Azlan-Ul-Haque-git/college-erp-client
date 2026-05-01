@@ -1,8 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* =========================
+   BASE
+========================= */
 @layer base {
   html {
     @apply bg-slate-50 dark:bg-slate-900;
@@ -27,13 +31,17 @@
 
   ::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-purple-300 dark:bg-purple-700 rounded-full;
+    @apply bg-purple-400 dark:bg-purple-700 rounded-full;
   }
 }
 
+/* =========================
+   COMPONENTS
+========================= */
 @layer components {
   .card {
     @apply bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6;
@@ -61,5 +69,89 @@
 
   .badge-yellow {
     @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700;
+  }
+}
+
+/* =========================
+   ERP TABLE FIX (MAIN)
+========================= */
+
+.table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 18px;
+  display: bock;
+  margin-top: 20px;
+
+  /* smooth scroll */
+  scroll-behavior: smooth;
+}
+
+.table-wrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+  background: #8b5cf6;
+  border-radius: 20px;
+}
+
+/* 🔥 MAIN FIX */
+.erp-table {
+  min-width: 1200px;
+  width: max-content;
+  /* ⚡ IMPORTANT */
+  border-collapse: collapse;
+}
+
+.erp-table th,
+.erp-table td {
+  white-space: nowrap;
+  padding: 16px;
+}
+
+.erp-table th {
+  text-align: left;
+  color: #94a3b8;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.erp-table td {
+  font-size: 14px;
+  color: inherit;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.erp-table tr:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* loading */
+.loading-cell {
+  text-align: center;
+  padding: 40px;
+  color: #94a3b8;
+}
+
+/* =========================
+   MOBILE OPTIMIZATION
+========================= */
+
+@media (max-width: 768px) {
+  .erp-table {
+    min-width: 1100px;
+    /* keep scroll */
+  }
+
+  .erp-table th,
+  .erp-table td {
+    padding: 14px 12px;
+    font-size: 13px;
   }
 }

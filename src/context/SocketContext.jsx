@@ -1,24 +1,30 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
-
+import socket from "../utils/socket";
 const SocketContext = createContext(null);
 
 export const SocketProvider = ({ children }) => {
   const { user } = useAuth();
-  const [socket, setSocket] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
 
   useEffect(() => {
     if (!user) return;
-    const s = io(import.meta.env.VITE_SOCKET_URL || "http://localhost:5000", { withCredentials: true });
-    s.emit("user:online", user._id);
-    s.on("users:online", setOnlineUsers);
-    setSocket(s);
-    return () => s.disconnect();
+
+    // ✅ existing socket use करो (new io() मत बनाओ)
+    socket.emit("user:online", user._id);
+
+    socket.on("users:online", setOnlineUsers);
+
+    return () => {
+      socket.off("users:online", setOnlineUsers);
+    };
   }, [user]);
 
-  return <SocketContext.Provider value={{ socket, onlineUsers }}>{children}</SocketContext.Provider>;
+  return (
+    <SocketContext.Provider value={{ socket, onlineUsers }}>
+      {children}
+    </SocketContext.Provider>
+  );
 };
 
 export const useSocket = () => useContext(SocketContext);

@@ -47,7 +47,7 @@ export default function ManageFaculty() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full max-w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Manage Faculty</h1>
@@ -62,10 +62,9 @@ export default function ManageFaculty() {
         <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or department..." className="input pl-10" />
       </div>
-
-      <div className="card p-0 overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+      <div className="card p-0 w-full ">
+        <div className="table-wrapper w-full">
+          <table className="erp-table text-sm">
             <thead className="bg-slate-50 dark:bg-slate-700/50">
               <tr>{["Name", "Employee ID", "Department", "Designation", "Subjects", "Action"].map(h => (
                 <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">{h}</th>

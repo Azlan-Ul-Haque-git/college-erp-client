@@ -38,7 +38,10 @@ export default function ResultCard() {
 
   const handleDownload = () => {
     import("html2canvas").then(({ default: html2canvas }) => {
-      html2canvas(cardRef.current, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
+      html2canvas(cardRef.current, {
+        scale: 2,
+        backgroundColor: null
+      }).then(canvas => {
         const link = document.createElement("a");
         link.download = `Result-Card-${user?.name}.png`;
         link.href = canvas.toDataURL("image/png");
@@ -48,7 +51,7 @@ export default function ResultCard() {
   };
 
   return (
-    <div className="space-y-4 w-full max-w-2xl mx-auto px-2 sm:px-0">
+    <div className="space-y-4 w-full max-w-full px-2 sm:px-4">
       {/* Header row */}
       <div className="flex items-center justify-between gap-2">
         <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-white">
@@ -66,8 +69,8 @@ export default function ResultCard() {
       {/* Card */}
       <div
         ref={cardRef}
-        className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden shadow-2xl
-                   border border-slate-200 dark:border-slate-700"
+        className="w-full max-w-full bg-white dark:bg-slate-900 rounded-2xl shadow-2xl
+           border border-slate-200 dark:border-slate-700"
       >
         {/* Gradient header */}
         <div className="bg-gradient-to-r from-violet-600 to-purple-700 px-4 py-5 text-center">
@@ -97,8 +100,8 @@ export default function ResultCard() {
 
         {/* Marks table — horizontally scrollable on mobile */}
         <div className="p-4 sm:p-6">
-          <div className="overflow-x-auto -mx-1 px-1">
-            <table className="w-full text-xs sm:text-sm min-w-[420px] mb-4 sm:mb-6">
+          <div className="w-full overflow-x-auto">
+            <table className="w-full text-xs sm:text-sm min-w-[600px]">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800">
                   {["Subject", "Internal\n(30)", "External\n(70)", "Total\n(100)", "Grade"].map(h => (
@@ -116,7 +119,8 @@ export default function ResultCard() {
                 {display.map((m, i) => (
                   <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="px-2 sm:px-3 py-2 font-medium text-slate-700 dark:text-slate-300
-                                   max-w-[120px] truncate">
+               max-w-[140px] sm:max-w-none truncate sm:whitespace-normal">
+
                       {m.subject}
                     </td>
                     <td className="px-2 sm:px-3 py-2 text-slate-600 dark:text-slate-400 text-center">

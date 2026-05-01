@@ -257,7 +257,7 @@ flex items-center justify-between shadow-sm">
       </AnimatePresence>
 
       {/* ── Desktop sidebar ─────────────────────────────────────────────────── */}
-      <div className="hidden lg:flex lg:flex-col w-64 h-screen
+      <div className="hidden lg:flex lg:flex-col w-64 h-screen flex-shrink-0
         bg-white dark:bg-slate-800
         border-r border-slate-100 dark:border-slate-700
         shadow-sm fixed left-0 top-0 z-30">

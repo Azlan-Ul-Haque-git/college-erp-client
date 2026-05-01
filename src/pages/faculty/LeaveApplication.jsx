@@ -108,7 +108,7 @@ export default function LeaveApplication() {
                 <div>
                   <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Reason *</label>
                   <textarea value={form.reason} onChange={e => setForm(p => ({ ...p, reason: e.target.value }))}
-                    required rows={3} className="input resize-none" placeholder="Leave ka reason..." />
+                    required rows={3} className="input resize-none" placeholder="Reason Of Leave..." />
                 </div>
                 <div className="flex gap-3 justify-end">
                   <button type="button" onClick={() => setModal(false)} className="btn-secondary">Cancel</button>
