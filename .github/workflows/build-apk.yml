@@ -10,18 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 📦 Code checkout
+      # 📦 Checkout
       - name: Checkout
         uses: actions/checkout@v4
 
-      # ☕ Java setup
+      # ☕ Java
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
-      # 🟢 Node setup
+      # 🟢 Node
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # 🏗 Build frontend
+      # 🏗 Build web
       - name: Build web app
         run: npm run build
         env:
@@ -39,18 +39,22 @@ jobs:
           VITE_SOCKET_URL: https://college-erp-server-kvc4.onrender.com
           VITE_RAZORPAY_KEY_ID: rzp_live_SN231JB1uxCoR7
 
-      # ⚡ Install Capacitor (NO INIT / NO ADD)
+      # ⚡ Capacitor install
       - name: Install Capacitor
         run: npm install @capacitor/core @capacitor/cli @capacitor/android
 
-      # 🔄 Sync project
+      # ✅ ADD ANDROID (FIX)
+      - name: Add Android Platform
+        run: npx cap add android
+
+      # 🔄 Sync
       - name: Sync Capacitor
         run: npx cap sync android
 
-      # 🔥 AUTO VERSION INCREMENT (MAIN FIX)
+      # 🔥 Auto version increment
       - name: Auto Increment versionCode
         run: |
-          FILE=android/app/build.gradle
+          FILE=$(ls android/app/build.gradle*)
 
           CURRENT=$(grep versionCode $FILE | awk '{print $2}')
           NEXT=$((CURRENT + 1))
@@ -61,12 +65,12 @@ jobs:
           sed -i "s/versionCode $CURRENT/versionCode $NEXT/" $FILE
           sed -i "s/versionName \".*\"/versionName \"1.$NEXT\"/" $FILE
 
-      # 🔐 Permissions (optional but ok)
+      # 🔐 Permissions
       - name: Add Android Permissions
         run: |
           sed -i '/<\/manifest>/i \    <uses-permission android:name="android.permission.CAMERA" \/>\n    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" \/>\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" \/>\n    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" \/>\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" \/>\n    <uses-feature android:name="android.hardware.camera" android:required="true" \/>' android/app/src/main/AndroidManifest.xml
 
-      # ⚙️ Fix Gradle version (safe)
+      # ⚙️ Gradle fix
       - name: Update Gradle wrapper
         run: |
           cd android
@@ -79,7 +83,7 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      # 📤 Upload APK
+      # 📤 Upload
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
