@@ -36,6 +36,7 @@ export default function App() {
           path="/faculty/*"
           element={<ProtectedRoute role="faculty"><FacultyDashboard /></ProtectedRoute>}
         />
+
         <Route
           path="/student/*"
           element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>}

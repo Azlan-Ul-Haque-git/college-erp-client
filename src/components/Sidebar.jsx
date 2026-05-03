@@ -16,7 +16,8 @@ import {
   Bars3Icon,
   XMarkIcon,
   UserCircleIcon,
-  CheckCircleIcon,        // ← NEW: for Attendance Approvals
+  CheckCircleIcon,
+  ClockIcon,        // ← NEW: for Attendance Approvals
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
@@ -41,19 +42,30 @@ const MENUS = {
     { label: "ID Card", path: "/idcard", icon: UserCircleIcon },
     { label: "Settings", path: "/profile", icon: UserCircleIcon },
   ],
+
   faculty: [
     { label: "Dashboard", path: "/faculty/dashboard", icon: HomeIcon },
     { label: "Attendance", path: "/faculty/attendance", icon: ClipboardDocumentListIcon },
-    { label: "Marks", path: "/faculty/marks", icon: ChartBarIcon },
+    {
+      label: "Attendance Approvals", path: "/faculty/attendanceapprovals", icon:
+        ClockIcon
+    },
+    { label: "Upload Marks", path: "/faculty/uploadmarks", icon: ChartBarIcon },
     { label: "Timetable", path: "/faculty/timetable", icon: CalendarIcon },
     { label: "Assignments", path: "/faculty/assignments", icon: ClipboardDocumentListIcon },
     { label: "Notes", path: "/faculty/notes", icon: AcademicCapIcon },
     { label: "Notices", path: "/faculty/notices", icon: BellIcon },
     { label: "Student Leaves", path: "/faculty/leaves", icon: CalendarIcon },
+    {
+      label: "New Registrations",
+      path: "/faculty/registrations",
+      icon: ClipboardDocumentListIcon
+    },
     { label: "Chat", path: "/faculty/chat", icon: ChatBubbleLeftRightIcon },
     { label: "ID Card", path: "/idcard", icon: UserCircleIcon },
     { label: "Settings", path: "/profile", icon: UserCircleIcon },
   ],
+
   student: [
     { label: "Dashboard", path: "/student/dashboard", icon: HomeIcon },
     { label: "Attendance", path: "/student/attendance", icon: ClipboardDocumentListIcon },

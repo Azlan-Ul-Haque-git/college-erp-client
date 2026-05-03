@@ -1,251 +1,236 @@
-
 import { useState, useEffect } from "react";
-import axios from "../../utils/axiosInstance";
-import * as faceapi from "face-api.js";
-const SUBJECTS = ["Mathematics", "Physics", "Chemistry", "Computer Science", "English"];
+import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../context/AuthContext";
+import api from "../../utils/axiosInstance";
 
-export default function MarkAttendance() {
+const fmt = d =>
+  d ? new Date(d).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "—";
+
+const fmtDate = d =>
+  d ? new Date(d).toLocaleDateString("en-IN") : "—";
+
+export default function StudentAttendance() {
+
+  const { user } = useAuth();
+
+  const [today, setToday] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [previewStream, setPreviewStream] = useState(null);
+
+  const showToast = (msg, ok = true) => {
+    setToast({ msg, ok });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const refresh = async () => {
+    try {
+      const { data } = await api.get("/attendance/my-status");
+      setToday(data.data || null);
+    } catch { }
+    finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadModels = async () => {
-      const MODEL_URL = "/models";
-
-      await faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL);
-      await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
-      await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
-
-      console.log("Face models loaded");
-    };
-
-    loadModels();
+    refresh();
   }, []);
-  const [subject, setSubject] = useState(SUBJECTS[0]);
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
-  const [pending, setPending] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [facultyCheckin, setFacultyCheckin] = useState(false);
-  const [verifying, setVerifying] = useState(false);
-  const [message, setMessage] = useState("");
 
-  const fetchPending = async () => {
-    setLoading(true);
-    try {
-      const { data } = await axios.get(`/attendance/pending?subject=${subject}&date=${date}`);
-      setPending(data.data);
-    } catch (err) { }
-    setLoading(false);
-  };
-  const verifyFace = async (selfie, studentPhoto) => {
-    try {
+  /* ✅ CHECK IN */
+  const checkIn = () => {
+    setActionLoading(true);
 
-      const img1 = await faceapi.fetchImage(selfie);
-      const img2 = await faceapi.fetchImage(studentPhoto);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        let stream;
+        try {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
 
-      if (!img1 || !img2) {
-        alert("Image Doesnt loaded!");
-        return false;
-      }
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user" }
+          });
 
+          setPreviewStream(stream);
 
-      const d1 = await faceapi
-        .detectSingleFace(img1)
-        .withFaceLandmarks()
-        .withFaceDescriptor();
+          const video = document.createElement("video");
+          video.srcObject = stream;
+          await video.play();
 
-      const d2 = await faceapi
-        .detectSingleFace(img2)
-        .withFaceLandmarks()
-        .withFaceDescriptor();
+          await new Promise(r => setTimeout(r, 300));
 
-      if (!d1 || !d2) {
-        alert("Face detection failed!");
-        return false;
-      }
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
 
-      const distance = faceapi.euclideanDistance(
-        d1.descriptor,
-        d2.descriptor
-      );
+          canvas.getContext("2d").drawImage(video, 0, 0);
 
-      return distance < 0.5;
+          const image = canvas.toDataURL("image/jpeg", 0.9);
 
-    } catch (err) {
-      console.log(err);
-      return false;
-    }
-  };
+          stream.getTracks().forEach(t => t.stop());
+          setPreviewStream(null);
 
-  const verifyAttendance = async (id, status) => {
-    try {
-      await axios.put(`/attendance/verify/${id}`, { status });
-      setPending((prev) => prev.filter((p) => p._id !== id));
-      setMessage(`✅ ${status === "present" ? "Present" : "Absent"} mark ho gaya!`);
-      setTimeout(() => setMessage(""), 2000);
-    } catch (err) {
-      setMessage("Error aaya!");
-    }
+          const { data } = await api.post("/attendance/checkin", {
+            lat,
+            lng,
+            image
+          });
+
+          setToday(data.data);
+          showToast(data.message);
+
+        } catch (err) {
+          if (stream) stream.getTracks().forEach(t => t.stop());
+          setPreviewStream(null);
+          showToast(err?.response?.data?.message || "Check-in failed", false);
+        }
+
+        setActionLoading(false);
+      },
+      () => {
+        showToast("Location denied", false);
+        setActionLoading(false);
+      },
+      { enableHighAccuracy: true }
+    );
   };
 
-  const markFacultyAttendance = async () => {
-    if (!navigator.geolocation) return setMessage("GPS not working!");
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      try {
-        const { data } = await axios.post("/attendance/faculty-checkin", {
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        });
-        setFacultyCheckin(true);
-        setMessage(data.message);
-      } catch (err) {
-        setMessage(err.response?.data?.message || "Error!");
-      }
-    }, () => setMessage("Location allow karo!"), { enableHighAccuracy: true });
+  /* ✅ CHECK OUT */
+  const checkOut = () => {
+    setActionLoading(true);
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        let stream;
+        try {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user" }
+          });
+
+          setPreviewStream(stream);
+
+          const video = document.createElement("video");
+          video.srcObject = stream;
+          await video.play();
+
+          await new Promise(r => setTimeout(r, 300));
+
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+
+          canvas.getContext("2d").drawImage(video, 0, 0);
+
+          const image = canvas.toDataURL("image/jpeg");
+
+          stream.getTracks().forEach(t => t.stop());
+          setPreviewStream(null);
+
+          const { data } = await api.post("/attendance/checkout", {
+            lat,
+            lng,
+            image
+          });
+
+          setToday(data.data);
+          showToast(data.message);
+
+        } catch (err) {
+          if (stream) stream.getTracks().forEach(t => t.stop());
+          setPreviewStream(null);
+          showToast(err?.response?.data?.message || "Checkout failed", false);
+        }
+
+        setActionLoading(false);
+      },
+      () => {
+        showToast("Location denied", false);
+        setActionLoading(false);
+      },
+      { enableHighAccuracy: true }
+    );
   };
+
+  const checkedIn = !!today?.checkIn?.time;
+  const checkedOut = !!today?.checkOut?.time;
+
+  if (loading) {
+    return <div className="text-center py-10">Loading...</div>;
+  }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">✅ Attendance Verify Please </h1>
+    <div className="space-y-6 max-w-3xl mx-auto">
 
-      {/* Faculty own attendance */}
-      <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-5 mb-6 text-white">
-        <h2 className="font-bold text-lg mb-2">MY Attendance</h2>
-        <p className="text-sm opacity-80 mb-3">You are out of college campus? Please Verify from Exact location!</p>
-        {!facultyCheckin ? (
-          <button onClick={markFacultyAttendance} className="bg-white text-purple-700 px-5 py-2 rounded-xl font-bold">
-            📍 Mark My Attendance
-          </button>
-        ) : (
-          <div className="bg-green-400/30 px-4 py-2 rounded-xl inline-block font-bold">
-            ✅ Todays Attendance Marked Successfully!
-          </div>
+      {/* TOAST */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className={`fixed top-4 right-4 px-4 py-2 rounded-lg text-white ${toast.ok ? "bg-green-500" : "bg-red-500"
+              }`}
+          >
+            {toast.msg}
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
 
-      {message && (
-        <div className="bg-green-50 text-green-700 p-3 rounded-lg mb-4 text-sm">{message}</div>
-      )}
+      <h1 className="text-2xl font-bold">📅 My Attendance</h1>
 
-      {/* Filter */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 mb-6">
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Subject</label>
-            <select
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:text-white"
-            >
-              {SUBJECTS.map((s) => <option key={s}>{s}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full border rounded-lg p-2 dark:bg-gray-700 dark:text-white"
-            />
-          </div>
+      <div className="card space-y-4">
+
+        <p>Today — {fmtDate(new Date())}</p>
+
+        {previewStream && (
+          <video
+            autoPlay
+            playsInline
+            ref={(video) => {
+              if (video) video.srcObject = previewStream;
+            }}
+            className="w-full rounded-lg"
+          />
+        )}
+
+        <div className="flex gap-6">
+          <TimeBlock label="Check In" value={fmt(today?.checkIn?.time)} />
+          <TimeBlock label="Check Out" value={fmt(today?.checkOut?.time)} />
         </div>
-        <button
-          onClick={fetchPending}
-          className="w-full bg-purple-600 text-white py-2 rounded-xl font-semibold"
-        >
-          🔍 View Students
-        </button>
+
+        <div className="flex gap-3">
+          <button
+            onClick={checkIn}
+            disabled={checkedIn || actionLoading}
+            className="btn-primary flex-1"
+          >
+            {checkedIn ? "Checked In" : "Check In"}
+          </button>
+
+          <button
+            onClick={checkOut}
+            disabled={!checkedIn || checkedOut || actionLoading}
+            className="btn-primary flex-1"
+          >
+            {checkedOut ? "Checked Out" : "Check Out"}
+          </button>
+        </div>
+
       </div>
+    </div>
+  );
+}
 
-      {/* Pending List */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6">
-        <h2 className="text-lg font-semibold mb-4 dark:text-white">
-          Pending Verification ({pending.length})
-        </h2>
-
-        {loading ? (
-          <p className="text-center text-gray-400 py-8">Loading...</p>
-        ) : pending.length === 0 ? (
-          <p className="text-center text-gray-400 py-8">No Pending! 🎉</p>
-        ) : (
-          <div className="space-y-4">
-            {pending.map((p) => (
-              <div key={p._id} className="border dark:border-gray-600 rounded-xl p-4">
-                <div className="flex items-start gap-4">
-                  {/* Selfie */}
-                  {p.selfie ? (
-                    <img
-                      src={p.selfie}
-                      alt="selfie"
-                      className="w-20 h-20 object-cover rounded-xl border-2 border-purple-200"
-                    />
-                  ) : (
-                    <div className="w-20 h-20 bg-gray-200 rounded-xl flex items-center justify-center text-3xl">
-                      👤
-                    </div>
-                  )}
-
-                  {/* Info */}
-                  <div className="flex-1">
-                    <p className="font-bold dark:text-white">
-                      {p.student?.user?.name || "Student"}
-                    </p>
-                    <p className="text-sm text-gray-500">{p.student?.user?.email}</p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      Roll No: {p.student?.rollNumber} | Branch: {p.student?.branch}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      ⏰ {p.checkinTime ? new Date(p.checkinTime).toLocaleTimeString() : "N/A"}
-                    </p>
-                    <p className="text-xs text-green-600">
-                      📍 {p.latitude?.toFixed(4)}, {p.longitude?.toFixed(4)}
-                    </p>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex flex-col gap-2">
-                    <button
-                      onClick={async () => {
-
-                        if (verifying) return;
-
-                        setVerifying(true);
-
-                        const studentPhoto = p.student?.user?.photo;
-
-                        if (!studentPhoto) {
-                          alert("There is no profile photo of student!");
-                          setVerifying(false);
-                          return;
-                        }
-
-                        const matched = await verifyFace(p.selfie, studentPhoto);
-
-                        if (matched) {
-                          verifyAttendance(p._id, "present");
-                        } else {
-                          alert("❌ Face cannot be matched!");
-                        }
-
-                        setVerifying(false);
-
-                      }}
-                      className="bg-green-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-green-600"
-                    >
-                      ✅ Present
-                    </button>
-                    <button
-                      onClick={() => verifyAttendance(p._id, "absent")}
-                      className="bg-red-500 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-red-600"
-                    >
-                      ❌ Absent
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+function TimeBlock({ label, value }) {
+  return (
+    <div className="flex flex-col items-center">
+      <p className="text-xs text-gray-400">{label}</p>
+      <p className="text-lg font-bold">{value}</p>
     </div>
   );
 }

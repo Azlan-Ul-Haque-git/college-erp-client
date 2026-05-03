@@ -8,9 +8,14 @@ import { ClipboardDocumentListIcon, ChartBarIcon, BellIcon, CalendarIcon } from 
 import api from "../../utils/axiosInstance";
 import AssignmentManager from "./AssignmentManager";
 import LeaveApplication from "./LeaveApplication";
+import UploadMarks from "./UploadMarks";
+import AttendanceApprovals from "./AttendanceApprovals";
 import NotesUpload from "./NotesUpload";
 import FacultyAttendance from "./FacultyAttendance";
 import socket from "../../utils/socket";
+import Timetable from "./Timetable";
+import RegistrationRequests from "./ManageRegistrationRequests";
+
 
 /* ---------------------- FACULTY NOTICES ---------------------- */
 
@@ -246,22 +251,25 @@ export default function FacultyDashboard() {
 
   return (
     <Layout>
-
       <Routes>
 
         <Route path="dashboard" element={<FacultyHome />} />
         <Route path="attendance" element={<FacultyAttendance />} />
         <Route path="notices" element={<FacultyNotices />} />
         <Route path="chat" element={<FacultyChat />} />
-
+        <Route path="registrations/*" element={<RegistrationRequests />} />
         <Route path="assignments" element={<AssignmentManager />} />
         <Route path="leaves" element={<LeaveApplication />} />
         <Route path="notes" element={<NotesUpload />} />
 
+        {/* 🔥 ADD THESE */}
+        <Route path="attendanceapprovals" element={<AttendanceApprovals />} />
+        <Route path="uploadmarks" element={<UploadMarks />} />
+        <Route path="timetable" element={<Timetable />} />
+
         <Route path="*" element={<FacultyHome />} />
 
       </Routes>
-
     </Layout>
   );
 

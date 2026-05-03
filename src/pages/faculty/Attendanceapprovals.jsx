@@ -140,9 +140,9 @@ export default function AttendanceApprovals() {
             {/* Filter tabs */}
             <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
                 {[
-                    { key: "all", label: `All (${records.length})` },
+
                     { key: "student", label: `Students (${stuCount})` },
-                    { key: "faculty", label: `Faculty (${facCount})` },
+
                 ].map(t => (
                     <button key={t.key} onClick={() => setFilter(t.key)}
                         className={`flex-shrink-0 px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold

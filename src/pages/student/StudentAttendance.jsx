@@ -15,6 +15,7 @@ export default function StudentAttendance() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [toast, setToast] = useState(null);
+  const [previewStream, setPreviewStream] = useState(null);
 
   const showToast = (msg, ok = true) => {
     setToast({ msg, ok });
@@ -22,7 +23,6 @@ export default function StudentAttendance() {
   };
 
   /* fetch attendance */
-
   const refresh = async () => {
     try {
       const [s, r] = await Promise.all([
@@ -39,23 +39,21 @@ export default function StudentAttendance() {
 
   useEffect(() => { refresh() }, []);
 
-
-  /* FACE + LOCATION CHECKIN */
+  /* ✅ CHECK-IN (FIXED) */
   const checkIn = () => {
     setActionLoading(true);
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
+        let stream;
         try {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
 
-          const stream =
-            await navigator.mediaDevices.getUserMedia({
-              video: {
-                facingMode: "user"
-              }
-            });
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user" }
+          });
+          setPreviewStream(stream);
 
           const video = document.createElement("video");
           video.srcObject = stream;
@@ -67,98 +65,100 @@ export default function StudentAttendance() {
 
           canvas.getContext("2d").drawImage(video, 0, 0);
 
-          const image =
-            canvas.toDataURL("image/jpeg");
+          const image = canvas.toDataURL("image/jpeg", 0.9);
 
           stream.getTracks().forEach(t => t.stop());
+          setPreviewStream(null);
 
-          const { data } =
-            await api.post("/attendance/checkin", {
-              lat,
-              lng,
-              image
-            });
+          const { data } = await api.post("/attendance/checkin", {
+            lat,
+            lng,
+            image
+          });
 
           setToday(data.data);
           refresh();
           showToast(data.message);
 
         } catch (err) {
-          showToast(
-            err.response?.data?.message ||
-            "Check-in failed",
-            false
-          );
+          if (stream) stream.getTracks().forEach(t => t.stop());
+          showToast(err?.response?.data?.message || "Check-in failed", false);
         }
 
         setActionLoading(false);
       },
-
       () => {
         showToast("Location denied", false);
         setActionLoading(false);
       },
-
       { enableHighAccuracy: true }
     );
   };
 
-  /* FACE CHECKOUT */
-  const checkOut = async () => {
+  /* ✅ CHECK-OUT (FIXED WITH GPS) */
+  const checkOut = () => {
     setActionLoading(true);
 
-    try {
-      const stream =
-        await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: "user"
-          }
-        });
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        let stream;
+        try {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
 
-      const video = document.createElement("video");
-      video.srcObject = stream;
-      await video.play();
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "user" }
+          });
+          setPreviewStream(stream);
+          const video = document.createElement("video");
+          video.srcObject = stream;
+          await video.play();
 
-      const canvas = document.createElement("canvas");
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+          const canvas = document.createElement("canvas");
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
 
-      canvas.getContext("2d").drawImage(video, 0, 0);
+          canvas.getContext("2d").drawImage(video, 0, 0);
 
-      const image = canvas.toDataURL("image/jpeg");
+          const image = canvas.toDataURL("image/jpeg", 0.9);
 
-      stream.getTracks().forEach(t => t.stop());
+          stream.getTracks().forEach(t => t.stop());
+          setPreviewStream(null);
 
-      const { data } =
-        await api.post("/attendance/checkout", { image });
+          const { data } = await api.post("/attendance/checkout", {
+            lat,
+            lng,
+            image
+          });
 
-      setToday(data.data);
-      refresh();
-      showToast(data.message);
+          setToday(data.data);
+          refresh();
+          showToast(data.message);
 
-    } catch (err) {
-      showToast(
-        err.response?.data?.message ||
-        "Checkout failed",
-        false
-      );
-    }
+        } catch (err) {
+          if (stream) stream.getTracks().forEach(t => t.stop());
+          showToast(err?.response?.data?.message || "Checkout failed", false);
+        }
 
-    setActionLoading(false);
+        setActionLoading(false);
+      },
+      () => {
+        showToast("Location denied", false);
+        setActionLoading(false);
+      },
+      { enableHighAccuracy: true }
+    );
   };
+
   const checkedIn = !!today?.checkIn?.time;
   const checkedOut = !!today?.checkOut?.time;
-
 
   if (loading) {
     return <div className="text-center py-10">Loading attendance...</div>
   }
 
   return (
-
     <div className="space-y-6 max-w-3xl mx-auto">
-
-      {/* toast */}
 
       <AnimatePresence>
         {toast && (
@@ -166,24 +166,30 @@ export default function StudentAttendance() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className={`fixed top-4 right-4 px-4 py-2 rounded-lg text-white ${toast.ok ? "bg-emerald-500" : "bg-red-500"
-              }`}
+            className={`fixed top-4 right-4 px-4 py-2 rounded-lg text-white ${toast.ok ? "bg-emerald-500" : "bg-red-500"}`}
           >
             {toast.msg}
           </motion.div>
         )}
       </AnimatePresence>
 
-
       <h1 className="text-2xl font-bold">📅 My Attendance</h1>
-
 
       <div className="card space-y-4">
 
         <p>Today — {fmtDate(new Date())}</p>
+        {previewStream && (
+          <video
+            autoPlay
+            playsInline
+            ref={(video) => {
+              if (video) video.srcObject = previewStream;
+            }}
+            className="w-full rounded-lg mb-3"
+          />
+        )}
 
         <div className="flex gap-6">
-
           <TimeBlock
             label="Check In"
             value={checkedIn ? fmt(today.checkIn.time) : "—"}
@@ -197,12 +203,9 @@ export default function StudentAttendance() {
             active={checkedOut}
             color="text-purple-500"
           />
-
         </div>
 
-
         <div className="flex gap-3">
-
           <button
             onClick={checkIn}
             disabled={checkedIn || actionLoading}
@@ -218,31 +221,20 @@ export default function StudentAttendance() {
           >
             {checkedOut ? "Checked Out" : "Check Out"}
           </button>
-
         </div>
 
       </div>
-
     </div>
-
   );
-
 }
 
 function TimeBlock({ label, value, active, color }) {
-
   return (
-
     <div className="flex flex-col items-center">
-
       <p className="text-xs text-gray-400">{label}</p>
-
       <p className={`text-lg font-bold ${active ? color : "text-gray-300"}`}>
         {value}
       </p>
-
     </div>
-
   );
-
 }
