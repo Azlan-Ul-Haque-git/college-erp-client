@@ -29,6 +29,7 @@ function StudentTimetable() {
   const [timetable, setTimetable] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+
   const [student, setStudent] = useState(null);
 
   useEffect(() => {
@@ -92,6 +93,7 @@ function StudentTimetable() {
 
 // ─── Student Notices ─────────────────────────────────────────────────────────
 function StudentNotices() {
+  const { user } = useAuth();
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -102,7 +104,24 @@ function StudentNotices() {
       .finally(() => setLoading(false));
   }, []);
 
-  const catColor = (role) => {
+  const filteredNotices = notices.filter((n) => {
+
+    if (
+      n.targetAudience !== "all" &&
+      n.targetAudience !== "students"
+    ) {
+      return false;
+    }
+
+    if (n.targetStudentStatus === "all") {
+      return true;
+    }
+
+    return n.targetStudentStatus === user?.profile?.status;
+
+  });
+
+  const catColor = (audience) => {
     if (role === "all") return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
     if (role === "student") return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
     return "bg-gray-100 text-gray-700";
@@ -125,15 +144,23 @@ function StudentNotices() {
         <div className="card text-center py-12">
           <p className="text-slate-400">Loading notices...</p>
         </div>
-      ) : notices.length === 0 ? (
+      ) : filteredNotices.length === 0 ? (
         <div className="card text-center py-12">
           <p className="text-4xl mb-3">📢</p>
           <p className="text-slate-500">No notice Yet</p>
         </div>
       ) : (
+
         <div className="space-y-3">
-          {notices.map((n, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className="card">
+          {filteredNotices.map((n, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="card"
+            >
+
               <div className="flex items-start gap-3">
                 <div className={`w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0 ${dotColor(n.targetRole)}`} />
                 <div className="flex-1 min-w-0">
@@ -321,6 +348,7 @@ function StudentChat() {
 // ─── Student Home ─────────────────────────────────────────────────────────────
 function StudentHome() {
   const { user } = useAuth();
+  const studentProfile = user?.profile;
   const [attendance, setAttendance] = useState([]);
   const [marks, setMarks] = useState([]);
   const [fees, setFees] = useState(null);
@@ -349,6 +377,55 @@ function StudentHome() {
 
   return (
     <div className="space-y-6">
+      <div
+        className={`
+    rounded-2xl p-5 border
+    ${studentProfile?.status === "backlog"
+            ? "bg-red-50 border-red-200"
+            : studentProfile?.status === "ba_scheme"
+              ? "bg-yellow-50 border-yellow-200"
+              : studentProfile?.status === "passout"
+                ? "bg-blue-50 border-blue-200"
+                : "bg-green-50 border-green-200"
+          }
+  `}
+      >
+
+        <div className="flex items-center justify-between flex-wrap gap-3">
+
+          <div>
+
+            <p className="text-sm text-slate-500 mb-1">
+              Student Academic Status
+            </p>
+
+            <h2 className="text-xl font-bold">
+
+              {studentProfile?.status === "backlog"
+                ? "Backlog Student"
+                : studentProfile?.status === "ba_scheme"
+                  ? "BA Scheme Student"
+                  : studentProfile?.status === "passout"
+                    ? "Passout Student"
+                    : "Regular Student"}
+
+            </h2>
+
+          </div>
+
+          {studentProfile?.status === "backlog" && (
+
+            <div className="px-4 py-2 rounded-xl bg-red-100 text-red-700 font-bold">
+
+              {studentProfile?.backlogCount || 0} Backlogs
+
+            </div>
+
+          )}
+
+        </div>
+
+      </div>
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
         <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
           Welcome, {user?.name?.split(" ")[0]}! 👋

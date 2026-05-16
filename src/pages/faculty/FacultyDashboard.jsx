@@ -15,6 +15,7 @@ import FacultyAttendance from "./FacultyAttendance";
 import socket from "../../utils/socket";
 import Timetable from "./Timetable";
 import RegistrationRequests from "./ManageRegistrationRequests";
+import ManageNotices from "./ManageNotices";
 
 
 /* ---------------------- FACULTY NOTICES ---------------------- */
@@ -255,7 +256,7 @@ export default function FacultyDashboard() {
 
         <Route path="dashboard" element={<FacultyHome />} />
         <Route path="attendance" element={<FacultyAttendance />} />
-        <Route path="notices" element={<FacultyNotices />} />
+
         <Route path="chat" element={<FacultyChat />} />
         <Route path="registrations/*" element={<RegistrationRequests />} />
         <Route path="assignments" element={<AssignmentManager />} />
@@ -268,7 +269,7 @@ export default function FacultyDashboard() {
         <Route path="timetable" element={<Timetable />} />
 
         <Route path="*" element={<FacultyHome />} />
-
+        <Route path="notices" element={<ManageNotices />} />
       </Routes>
     </Layout>
   );
