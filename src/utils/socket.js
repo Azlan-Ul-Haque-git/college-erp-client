@@ -1,8 +1,8 @@
 import { io } from "socket.io-client";
 
-const socket = io("https://college-erp-server-kvc4.onrender.com", {
+const socket = io(import.meta.env.VITE_SOCKET_URL, {
+    transports: ["websocket", "polling"],
     withCredentials: true,
-    transports: ["websocket"], // ❌ polling बंद
 });
 
 export default socket;
