@@ -254,7 +254,7 @@ export default function FacultyDashboard() {
     <Layout>
       <Routes>
 
-        <Route path="dashboard" element={<FacultyHome />} />
+        <Route index element={<FacultyHome />} />
         <Route path="attendance" element={<FacultyAttendance />} />
 
         <Route path="chat" element={<FacultyChat />} />
@@ -268,7 +268,8 @@ export default function FacultyDashboard() {
         <Route path="uploadmarks" element={<UploadMarks />} />
         <Route path="timetable" element={<Timetable />} />
 
-        <Route path="*" element={<FacultyHome />} />
+        <Route path="*" element={<Navigate
+          to="/faculty/dashboard" />} />
         <Route path="notices" element={<ManageNotices />} />
       </Routes>
     </Layout>

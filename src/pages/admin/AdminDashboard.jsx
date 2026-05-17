@@ -278,7 +278,7 @@ export default function AdminDashboard() {
       <Routes>
         {/* ✅ FIXED: duplicate <Route path="timetable/*"> removed */}
         {/* ✅ FIXED: <Route path="*"> moved to the end so it doesn't swallow other routes */}
-        <Route path="dashboard" element={<DashboardHome />} />
+        <Route index element={<DashboardHome />} />
         <Route path="students/*" element={<ManageStudents />} />
         <Route path="faculty/*" element={<ManageFaculty />} />
         <Route path="fees/*" element={<ManageFees />} />
@@ -293,7 +293,8 @@ export default function AdminDashboard() {
         <Route path="registrations/*" element={<RegistrationRequests />} />
         <Route path="reports/*" element={<AdminReports />} />
         {/* Catch-all LAST — warna sab routes yahan aa jaate */}
-        <Route path="*" element={<DashboardHome />} />
+        <Route path="*" element={<Navigate
+          to="/admin/dashboard" />} />
       </Routes>
     </Layout>
   );

@@ -29,17 +29,30 @@ export default function App() {
 
         {/* Role dashboards — nested routes are handled INSIDE each Dashboard component */}
         <Route
-          path="/admin/*"
-          element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>}
-        />
-        <Route
-          path="/faculty/*"
-          element={<ProtectedRoute role="faculty"><FacultyDashboard /></ProtectedRoute>}
+          path="/admin/dashboard/*"
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
         />
 
         <Route
-          path="/student/*"
-          element={<ProtectedRoute role="student"><StudentDashboard /></ProtectedRoute>}
+          path="/faculty/dashboard/*"
+          element={
+            <ProtectedRoute role="faculty">
+              <FacultyDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/dashboard/*"
+          element={
+            <ProtectedRoute role="student">
+              <StudentDashboard />
+            </ProtectedRoute>
+          }
         />
 
         {/* Shared pages */}

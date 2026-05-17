@@ -1,7 +1,7 @@
+import { Routes, Route, Navigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
 import Layout from "../../components/Layout";
 import StatCard from "../../components/StatCard";
 import { motion } from "framer-motion";
@@ -509,7 +509,7 @@ export default function StudentDashboard() {
   return (
     <Layout>
       <Routes>
-        <Route path="dashboard" element={<StudentHome />} />
+        <Route index element={<StudentHome />} />
         <Route path="attendance" element={<ViewAttendance />} />
         <Route path="mark-attendance" element={<StudentAttendance />} />
         <Route path="marks" element={<ViewMarks />} />
@@ -525,7 +525,7 @@ export default function StudentDashboard() {
         <Route path="study-material" element={<StudyMaterial />} />
         <Route path="assignments" element={<StudentAssignments />} />
         <Route path="rgpv-updates" element={<RGPVUpdates />} />
-        <Route path="*" element={<StudentHome />} />
+        <Route path="*" element={<Navigate to="/student/dashboard" />} />
       </Routes>
     </Layout>
   );

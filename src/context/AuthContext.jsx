@@ -16,12 +16,29 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = useCallback(async (email, password) => {
-    const { data } = await api.post("/auth/login", { email, password });
-    localStorage.setItem("erp_token", data.token);
-    localStorage.setItem("erp_user", JSON.stringify(data.user));
-    setUser(data.user);
-    toast.success(`Welcome back, ${data.user.name}!`);
-    return data.user;
+    try {
+      const res = await api.post("/auth/login", {
+        email,
+        password,
+      });
+
+      console.log("FULL LOGIN RESPONSE =>", res.data);
+
+      const data = res.data;
+
+      localStorage.setItem("erp_token", data.token);
+      localStorage.setItem("erp_user", JSON.stringify(data.user));
+
+      setUser(data.user);
+
+      toast.success(`Welcome back, ${data.user.name}!`);
+
+      return data.user;
+
+    } catch (err) {
+      console.log("LOGIN ERROR =>", err.response?.data || err.message);
+      throw err;
+    }
   }, []);
 
   const logout = useCallback(() => {
