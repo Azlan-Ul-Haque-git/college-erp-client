@@ -345,7 +345,8 @@ function StudentChat() {
     </div>
   );
 }
-// ─── Student Home ─────────────────────────────────────────────────────────────
+// ─── Student Home Page
+// ─────────────────────────────────────────────────────────────
 function StudentHome() {
   const { user } = useAuth();
   const studentProfile = user?.profile;
