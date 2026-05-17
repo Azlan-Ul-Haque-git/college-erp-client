@@ -51,19 +51,34 @@ export default function Login() {
     setRipple({ x: e.clientX - btn.left, y: e.clientY - btn.top });
     setTimeout(() => setRipple(null), 600);
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.email || !form.password) { toast.error("Please fill in all fields"); return; }
+
+    if (!form.email || !form.password) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
     setLoading(true);
     try {
       const user = await login(form.email, form.password);
+
+      console.log("LOGIN USER =>", user);
+
       setSuccess(true);
-      setTimeout(() => navigate(`/${user.role}/dashboard`), 1800);
+
+      setTimeout(() => navigate(`/${user.role}`), 1200);
+
     } catch (err) {
-      toast.error(err.response?.data?.message || "Login failed");
+      console.log(err);
+
+      toast.error(
+        err.response?.data?.message || "Login failed"
+      );
+
       setLoading(false);
     }
+    setLoading(false);
   };
 
   return (
