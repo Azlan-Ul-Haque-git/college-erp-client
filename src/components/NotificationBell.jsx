@@ -12,7 +12,7 @@ export default function NotificationBell() {
     useEffect(() => {
         const fetchNotifications = async () => {
             try {
-                const res = await api.get("/api/notifications");
+                const res = await api.get("/notifications");
                 setNotifications(res.data.notifications || []);
             } catch (err) {
                 console.log(err);

@@ -1,35 +1,56 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { lazy, Suspense } from "react";
+
 import { useAuth } from "./context/AuthContext";
+
 import Login from "./pages/auth/Login";
 import ForgotPassword from "./pages/auth/ForgotPassword";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Loader from "./components/Loader";
-import ProfileSettings from "./pages/ProfileSettings";
-import IDCard from "./pages/IDCard";
 import Register from "./pages/auth/Register";
 
+import ProtectedRoute from "./components/ProtectedRoute";
+import Loader from "./components/Loader";
+
+import ProfileSettings from "./pages/ProfileSettings";
+import IDCard from "./pages/IDCard";
+import DownloadApp from "./pages/DownloadApp";
+
+/* ADMIN */
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+
+/* FACULTY */
 const FacultyDashboard = lazy(() => import("./pages/faculty/FacultyDashboard"));
+
+/* STUDENT */
 const StudentDashboard = lazy(() => import("./pages/student/StudentDashboard"));
 
 export default function App() {
+
   const { user } = useAuth();
 
   return (
+
     <Suspense fallback={<Loader />}>
+
       <Routes>
-        {/* Auth */}
+
+        {/* AUTH */}
+
         <Route
           path="/login"
-          element={!user ? <Login /> : <Navigate to={`/${user.role}/dashboard`} />}
+          element={
+            !user
+              ? <Login />
+              : <Navigate to={`/${user.role}/dashboard`} />
+          }
         />
+
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/register" element={<Register />} />
 
-        {/* Role dashboards — nested routes are handled INSIDE each Dashboard component */}
+        {/* ================= ADMIN ================= */}
+
         <Route
-          path="/admin/dashboard/*"
+          path="/admin/*"
           element={
             <ProtectedRoute role="admin">
               <AdminDashboard />
@@ -37,8 +58,10 @@ export default function App() {
           }
         />
 
+        {/* ================= FACULTY ================= */}
+
         <Route
-          path="/faculty/dashboard/*"
+          path="/faculty/*"
           element={
             <ProtectedRoute role="faculty">
               <FacultyDashboard />
@@ -46,8 +69,10 @@ export default function App() {
           }
         />
 
+        {/* ================= STUDENT ================= */}
+
         <Route
-          path="/student/dashboard/*"
+          path="/student/*"
           element={
             <ProtectedRoute role="student">
               <StudentDashboard />
@@ -55,14 +80,36 @@ export default function App() {
           }
         />
 
-        {/* Shared pages */}
-        <Route path="/profile" element={user ? <ProfileSettings /> : <Navigate to="/login" />} />
-        <Route path="/idcard" element={user ? <IDCard /> : <Navigate to="/login" />} />
+        {/* SHARED */}
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route
+          path="/profile"
+          element={
+            user
+              ? <ProfileSettings />
+              : <Navigate to="/login" />
+          }
+        />
+
+        <Route
+          path="/idcard"
+          element={
+            user
+              ? <IDCard />
+              : <Navigate to="/login" />
+          }
+        />
+
+        {/* DEFAULT */}
+
+        <Route
+          path="*"
+          element={<Navigate to="/login" />}
+        />
+        <Route path="/download-app" element={<DownloadApp />} />
 
       </Routes>
+
     </Suspense>
   );
 }

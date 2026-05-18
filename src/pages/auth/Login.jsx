@@ -421,6 +421,12 @@ export default function Login() {
             >
               {loading ? "Logging in..." : "Login"}
             </button>
+            <a
+              href="/download-app"
+              className="block text-center mt-4 text-purple-300 hover:text-purple-200 hover:underline"
+            >
+              Download Android App
+            </a>
           </form>
 
           <p className="text-center text-white/20 text-xs mt-6">

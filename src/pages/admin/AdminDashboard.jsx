@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "../../components/Layout";
 import StatCard from "../../components/StatCard";
 import { motion } from "framer-motion";
@@ -278,7 +278,7 @@ export default function AdminDashboard() {
       <Routes>
         {/* ✅ FIXED: duplicate <Route path="timetable/*"> removed */}
         {/* ✅ FIXED: <Route path="*"> moved to the end so it doesn't swallow other routes */}
-        <Route index element={<DashboardHome />} />
+        <Route path="dashboard" element={<DashboardHome />} />
         <Route path="students/*" element={<ManageStudents />} />
         <Route path="faculty/*" element={<ManageFaculty />} />
         <Route path="fees/*" element={<ManageFees />} />

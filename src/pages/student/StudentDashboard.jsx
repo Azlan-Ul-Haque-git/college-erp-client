@@ -122,66 +122,74 @@ function StudentNotices() {
   });
 
   const catColor = (audience) => {
-    if (role === "all") return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
-    if (role === "student") return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
+    if (audience === "all") return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
+    if (audience === "student") return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
     return "bg-gray-100 text-gray-700";
   };
+};
 
-  const dotColor = (role) => {
-    if (role === "all") return "bg-purple-500";
-    if (role === "student") return "bg-blue-500";
-    return "bg-gray-400";
-  };
+const dotColor = (audience) => {
 
-  return (
-    <div className="space-y-6">
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Notices</h1>
-        <p className="text-slate-500 text-sm mt-1">Latest announcements from college</p>
-      </motion.div>
+  if (audience === "all") {
+    return "bg-purple-500";
+  }
 
-      {loading ? (
-        <div className="card text-center py-12">
-          <p className="text-slate-400">Loading notices...</p>
-        </div>
-      ) : filteredNotices.length === 0 ? (
-        <div className="card text-center py-12">
-          <p className="text-4xl mb-3">📢</p>
-          <p className="text-slate-500">No notice Yet</p>
-        </div>
-      ) : (
+  if (audience === "student") {
+    return "bg-blue-500";
+  }
 
-        <div className="space-y-3">
-          {filteredNotices.map((n, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="card"
-            >
+  return "bg-gray-400";
+};
 
-              <div className="flex items-start gap-3">
-                <div className={`w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0 ${dotColor(n.targetRole)}`} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <h3 className="font-semibold text-slate-800 dark:text-white">{n.title}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${catColor(n.targetRole)}`}>
-                      {n.targetRole}
-                    </span>
-                  </div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{n.content}</p>
-                  <p className="text-xs text-slate-400 mt-2">
-                    Posted by {n.postedBy?.name} · {new Date(n.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                  </p>
+return (
+  <div className="space-y-6">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Notices</h1>
+      <p className="text-slate-500 text-sm mt-1">Latest announcements from college</p>
+    </motion.div>
+
+    {loading ? (
+      <div className="card text-center py-12">
+        <p className="text-slate-400">Loading notices...</p>
+      </div>
+    ) : filteredNotices.length === 0 ? (
+      <div className="card text-center py-12">
+        <p className="text-4xl mb-3">📢</p>
+        <p className="text-slate-500">No notice Yet</p>
+      </div>
+    ) : (
+
+      <div className="space-y-3">
+        {filteredNotices.map((n, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className="card"
+          >
+
+            <div className="flex items-start gap-3">
+              <div className={`w-2.5 h-2.5 rounded-full mt-1.5 flex-shrink-0 ${dotColor(n.targetRole)}`} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <h3 className="font-semibold text-slate-800 dark:text-white">{n.title}</h3>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${catColor(n.targetRole)}`}>
+                    {n.targetRole}
+                  </span>
                 </div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{n.content}</p>
+                <p className="text-xs text-slate-400 mt-2">
+                  Posted by {n.postedBy?.name} · {new Date(n.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                </p>
               </div>
-            </motion.div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    )}
+  </div>
+);
 }
 function StudentChat() {
   const [users, setUsers] = useState([]);

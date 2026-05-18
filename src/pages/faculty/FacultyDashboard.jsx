@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "../../components/Layout";
 import StatCard from "../../components/StatCard";
 import { motion } from "framer-motion";
