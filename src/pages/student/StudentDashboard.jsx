@@ -190,7 +190,7 @@ return (
     )}
   </div>
 );
-}
+
 function StudentChat() {
   const [users, setUsers] = useState([]);
   const [selected, setSelected] = useState(null);
