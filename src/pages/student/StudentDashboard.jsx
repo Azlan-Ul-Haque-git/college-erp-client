@@ -525,26 +525,33 @@ function StudentHome() {
 // ─── Main Export ──────────────────────────────────────────────────────────────
 export default function StudentDashboard() {
   return (
-    <Layout>
-      <Routes>
-        <Route index element={<StudentHome />} />
-        <Route path="attendance" element={<ViewAttendance />} />
-        <Route path="mark-attendance" element={<StudentAttendance />} />
-        <Route path="marks" element={<ViewMarks />} />
-        <Route path="fees" element={<ViewFees />} />
-        <Route path="timetable" element={<StudentTimetable />} />
-        <Route path="notices" element={<StudentNotices />} />
-        <Route path="chat" element={<StudentChat />} />
-        <Route path="ai" element={<AIPrediction />} />
-        <Route path="result" element={<ResultCard />} />
-        <Route path="exam-schedule" element={<ExamSchedule />} />
-        <Route path="leaves" element={<LeaveApplication />} />
-        <Route path="grievance" element={<GrievancePortal />} />
-        <Route path="study-material" element={<StudyMaterial />} />
-        <Route path="assignments" element={<StudentAssignments />} />
-        <Route path="rgpv-updates" element={<RGPVUpdates />} />
-        <Route path="*" element={<Navigate to="/student/dashboard" />} />
-      </Routes>
-    </Layout>
+    <Routes>
+      <Route
+        path="/*"
+        element={
+          <Layout>
+            <Route index element={<StudentHome />} />
+            <Route path="attendance" element={<ViewAttendance />} />
+            <Route path="mark-attendance" element={<StudentAttendance />} />
+            <Route path="marks" element={<ViewMarks />} />
+            <Route path="fees" element={<ViewFees />} />
+            <Route path="timetable" element={<StudentTimetable />} />
+            <Route path="notices" element={<StudentNotices />} />
+            <Route path="chat" element={<StudentChat />} />
+            <Route path="ai" element={<AIPrediction />} />
+            <Route path="result" element={<ResultCard />} />
+            <Route path="exam-schedule" element={<ExamSchedule />} />
+            <Route path="leaves" element={<LeaveApplication />} />
+            <Route path="grievance" element={<GrievancePortal />} />
+            <Route path="study-material" element={<StudyMaterial />} />
+            <Route path="assignments" element={<StudentAssignments />} />
+            <Route path="rgpv-updates" element={<RGPVUpdates />} />
+            <Route path="*" element={<Navigate to="/student/dashboard" />} />
+
+          </Layout>
+        }
+      />
+    </Routes>
   );
 }
+
