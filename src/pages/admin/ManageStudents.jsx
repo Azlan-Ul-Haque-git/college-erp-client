@@ -43,8 +43,11 @@ export default function ManageStudents() {
 
   const fetchStudents = useCallback(async () => {
     try {
+
       const { data } = await api.get("/students");
-      setStudents(data.students || []);
+
+      setStudents(data.data || []);
+
     } catch {
       toast.error("Failed to load students");
     } finally {
