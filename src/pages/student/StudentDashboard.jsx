@@ -363,7 +363,12 @@ function StudentHome() {
   const [notices, setNotices] = useState([]);
 
   useEffect(() => {
-    api.get("/attendance/my").then(r => setAttendance(r.data.data || [])).catch(() => { });
+    api.get("/attendance/my-status")
+      .then(r => {
+        const record = r.data.data;
+        setAttendance(record ? [record] : []);
+      })
+      .catch(() => { });
     api.get("/marks/my-marks").then(r => setMarks(r.data.marks || [])).catch(() => { });
     api.get("/fees/my-fees").then(r => setFees(r.data.fees || null)).catch(() => { });
     api.get("/notices").then(r => setNotices((r.data.notices || []).slice(0, 3))).catch(() => { });

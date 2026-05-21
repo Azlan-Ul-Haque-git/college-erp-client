@@ -268,9 +268,12 @@ export default function FacultyDashboard() {
         <Route path="uploadmarks" element={<UploadMarks />} />
         <Route path="timetable" element={<Timetable />} />
 
-        <Route path="*" element={<Navigate
-          to="/faculty/dashboard" />} />
         <Route path="notices" element={<ManageNotices />} />
+
+        <Route
+          path="*"
+          element={<Navigate to="/faculty/dashboard" />}
+        />
       </Routes>
     </Layout>
   );
