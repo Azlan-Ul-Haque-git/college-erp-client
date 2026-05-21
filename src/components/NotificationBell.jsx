@@ -10,17 +10,8 @@ export default function NotificationBell() {
 
     /* ================= LOAD ================= */
     useEffect(() => {
-        const fetchNotifications = async () => {
-            try {
-                const res = await api.get("/notifications");
-                setNotifications(res.data.notifications || []);
-            } catch (err) {
-                console.log(err);
-            }
-        };
-        fetchNotifications();
+        setNotifications([]);
     }, []);
-
     /* ================= REALTIME ================= */
     useEffect(() => {
 
@@ -54,21 +45,14 @@ export default function NotificationBell() {
     }, []);
 
     /* ================= ACTIONS ================= */
-
     const markAsRead = async (id) => {
-        try {
-            await api.put(`/api/notifications/${id}/read`);
-            setNotifications(prev =>
-                prev.map(n => n._id === id ? { ...n, isRead: true } : n)
-            );
-        } catch { }
+        setNotifications(prev =>
+            prev.map(n => n._id === id ? { ...n, isRead: true } : n)
+        );
     };
 
     const clearAll = async () => {
-        try {
-            await api.delete("/api/notifications");
-            setNotifications([]);
-        } catch { }
+        setNotifications([]);
     };
 
     const unread = notifications.filter(n => !n.isRead).length;
