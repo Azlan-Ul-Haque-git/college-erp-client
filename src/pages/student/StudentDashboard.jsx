@@ -34,7 +34,7 @@ function StudentTimetable() {
 
   useEffect(() => {
     api.get("/students").then(r => {
-      const s = r.data.students?.find(s => s.user?.email === user?.email);
+      const s = r.data.data?.find(s => s.email === user?.email);
       setStudent(s);
       if (s) {
         api.get(`/timetable?branch=${s.branch}&semester=${s.semester}`)
@@ -117,7 +117,7 @@ function StudentNotices() {
       return true;
     }
 
-    return n.targetStudentStatus === user?.profile?.status;
+    return n.targetStudentStatus === user?.status;
 
   });
 
@@ -356,7 +356,7 @@ function StudentChat() {
 // ─────────────────────────────────────────────────────────────
 function StudentHome() {
   const { user } = useAuth();
-  const studentProfile = user?.profile;
+  const studentProfile = user;
   const [attendance, setAttendance] = useState([]);
   const [marks, setMarks] = useState([]);
   const [fees, setFees] = useState(null);
@@ -364,16 +364,22 @@ function StudentHome() {
 
   useEffect(() => {
     api.get("/attendance/my-status")
-      .then(r => {
-        const record = r.data.data;
-        setAttendance(record ? [record] : []);
-      })
+      .then(r => setAttendance(r.data.data ? [r.data.data] : []))
       .catch(() => { });
-    api.get("/marks/my-marks").then(r => setMarks(r.data.marks || [])).catch(() => { });
-    api.get("/fees/my-fees").then(r => setFees(r.data.fees || null)).catch(() => { });
-    api.get("/notices").then(r => setNotices((r.data.notices || []).slice(0, 3))).catch(() => { });
-  }, []);
 
+    api.get("/marks/my-marks")
+      .then(r => setMarks(r.data.marks || []))
+      .catch(() => { });
+
+    api.get("/fees/my-fees")
+      .then(r => setFees(r.data.fees || null))
+      .catch(() => { });
+
+    api.get("/notices")
+      .then(r => setNotices((r.data.notices || []).slice(0, 3)))
+      .catch(() => { });
+
+  }, []);
   const presentCount = attendance.filter(a => a.status === "present").length;
   const attendancePct = attendance.length > 0 ? Math.round(presentCount / attendance.length * 100) : 0;
   const cgpa = marks.length > 0

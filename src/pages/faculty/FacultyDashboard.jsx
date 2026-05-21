@@ -69,7 +69,7 @@ function FacultyChat() {
   const { user } = useAuth();
 
   useEffect(() => {
-    api.get("/chat/users").then(r => setUsers(r.data.users || [])).catch(() => { });
+    api.get("/chat/users").then(r => setUsers(r.data.data || r.data.users || [])).catch(() => { });
   }, []);
 
   // realtime messages
