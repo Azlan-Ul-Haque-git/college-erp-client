@@ -8,7 +8,7 @@ export default function ViewAttendance() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/attendance/my-summary").then(r => setData(r.data.summary || [])).catch(() => {}).finally(() => setLoading(false));
+    api.get("/attendance/my-status").then(r => setData(r.data.summary || [])).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   const mock = [

@@ -17,7 +17,7 @@ const EMPTY = {
   email: "",
   password: "",
   phone: "",
-  rollNo: "",
+  rollNumber: "",
   branch: "CSE",
   year: 1,
   semester: 1,
@@ -73,9 +73,9 @@ export default function ManageStudents() {
       name: s.user?.name || "",
       email: s.user?.email || "",
       password: "",
-      phone: s.user?.phone || "",
+      phone: s.phone || "",
 
-      rollNo: s.rollNo || "",
+      rollNumber: s.rollNumber || "",
       branch: s.branch || "CSE",
       year: s.year || 1,
       semester: s.semester || 1,
@@ -104,7 +104,7 @@ export default function ManageStudents() {
         await api.put(`/students/${editing}`, form);
         toast.success("Student updated!");
       } else {
-        await api.post("/auth/register", {
+        await api.post("/students/add", {
           ...form,
           role: "student",
         });
@@ -135,8 +135,8 @@ export default function ManageStudents() {
   };
 
   const filtered = students.filter((s) =>
-    s.user?.name?.toLowerCase().includes(search.toLowerCase()) ||
-    s.rollNo?.toLowerCase().includes(search.toLowerCase()) ||
+    s.name?.toLowerCase().includes(search.toLowerCase()) ||
+    s.rollNumber?.toLowerCase().includes(search.toLowerCase()) ||
     s.branch?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -237,11 +237,11 @@ export default function ManageStudents() {
                     <div className="flex items-center gap-3">
 
                       <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                        {s.user?.name?.[0]?.toUpperCase()}
+                        {s.name?.[0]?.toUpperCase()}
                       </div>
 
                       <span className="font-medium text-slate-700 dark:text-slate-200">
-                        {s.user?.name}
+                        {s.name}
                       </span>
 
                     </div>
@@ -249,7 +249,7 @@ export default function ManageStudents() {
 
                   {/* Roll */}
                   <td className="px-4 py-3 text-slate-600 dark:text-slate-400">
-                    {s.rollNo}
+                    {s.rollNumber}
                   </td>
 
                   {/* Branch */}
@@ -298,7 +298,7 @@ export default function ManageStudents() {
 
                   {/* Email */}
                   <td className="px-4 py-3 text-slate-500 text-xs">
-                    {s.user?.email}
+                    {s.email}
                   </td>
 
                   {/* Actions */}
