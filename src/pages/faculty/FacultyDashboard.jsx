@@ -249,38 +249,29 @@ function FacultyHome() {
 
 
 export default function FacultyDashboard() {
+
   return (
-    <Routes>
-      <Route
-        path="/*"
-        element={
-          <Layout>
+    <Layout>
+      <Routes>
 
-            <Route index element={<FacultyHome />} />
-            <Route path="attendance" element={<FacultyAttendance />} />
+        <Route index element={<FacultyHome />} />
+        <Route path="attendance" element={<FacultyAttendance />} />
 
-            <Route path="chat" element={<FacultyChat />} />
-            <Route path="registrations/*" element={<RegistrationRequests />} />
-            <Route path="assignments" element={<AssignmentManager />} />
-            <Route path="leaves" element={<LeaveApplication />} />
-            <Route path="notes" element={<NotesUpload />} />
+        <Route path="chat" element={<FacultyChat />} />
+        <Route path="registrations/*" element={<RegistrationRequests />} />
+        <Route path="assignments" element={<AssignmentManager />} />
+        <Route path="leaves" element={<LeaveApplication />} />
+        <Route path="notes" element={<NotesUpload />} />
 
-            {/* 🔥 ADD THESE */}
-            <Route path="attendanceapprovals" element={<AttendanceApprovals />} />
-            <Route path="uploadmarks" element={<UploadMarks />} />
-            <Route path="timetable" element={<Timetable />} />
+        {/* 🔥 ADD THESE */}
+        <Route path="attendanceapprovals" element={<AttendanceApprovals />} />
+        <Route path="uploadmarks" element={<UploadMarks />} />
+        <Route path="timetable" element={<Timetable />} />
 
-            <Route path="notices" element={<ManageNotices />} />
-
-            <Route
-              path="*"
-              element={<Navigate to="/faculty/dashboard" />}
-            />
-          </Layout>
-        }
-      />
-    </Routes>
+        <Route path="notices" element={<ManageNotices />} />
+        <Route path="/" element={<FacultyHome />} />
+      </Routes>
+    </Layout>
   );
+
 }
-
-
