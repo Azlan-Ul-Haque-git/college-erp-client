@@ -131,7 +131,7 @@ function FacultyChat() {
 
         <div className="card overflow-y-auto">
 
-          {users.map(u => (
+          {users?.map(u => (
 
             <div
               key={u._id}
@@ -249,29 +249,29 @@ function FacultyHome() {
 
 
 export default function FacultyDashboard() {
-
   return (
     <Layout>
       <Routes>
 
         <Route index element={<FacultyHome />} />
-        <Route path="attendance" element={<FacultyAttendance />} />
 
+        <Route path="attendance" element={<FacultyAttendance />} />
         <Route path="chat" element={<FacultyChat />} />
         <Route path="registrations/*" element={<RegistrationRequests />} />
         <Route path="assignments" element={<AssignmentManager />} />
         <Route path="leaves" element={<LeaveApplication />} />
         <Route path="notes" element={<NotesUpload />} />
-
-        {/* 🔥 ADD THESE */}
         <Route path="attendanceapprovals" element={<AttendanceApprovals />} />
         <Route path="uploadmarks" element={<UploadMarks />} />
         <Route path="timetable" element={<Timetable />} />
-
         <Route path="notices" element={<ManageNotices />} />
-        <Route path="/" element={<FacultyHome />} />
+
+        <Route
+          path="*"
+          element={<Navigate to="/faculty" replace />}
+        />
+
       </Routes>
     </Layout>
   );
-
 }

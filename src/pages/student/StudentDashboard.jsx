@@ -198,7 +198,7 @@ function StudentChat() {
   const { user } = useAuth();
 
   useEffect(() => {
-    api.get("/chat/users").then(r => setUsers(r.data.users || [])).catch(() => { });
+    api.get("/chat/users").then(r => setUsers(r.data.data || r.data.users || [])).catch(() => { });
   }, []);
 
   // Listen realtime messages
@@ -261,7 +261,7 @@ function StudentChat() {
         {/* Users */}
         <div className="card overflow-y-auto">
 
-          {users.map(u => (
+          {users?.map(u => (
 
             <div
               key={u._id}
@@ -527,7 +527,9 @@ export default function StudentDashboard() {
   return (
     <Layout>
       <Routes>
+
         <Route index element={<StudentHome />} />
+
         <Route path="attendance" element={<ViewAttendance />} />
         <Route path="mark-attendance" element={<StudentAttendance />} />
         <Route path="marks" element={<ViewMarks />} />
@@ -543,7 +545,12 @@ export default function StudentDashboard() {
         <Route path="study-material" element={<StudyMaterial />} />
         <Route path="assignments" element={<StudentAssignments />} />
         <Route path="rgpv-updates" element={<RGPVUpdates />} />
-        <Route path="/" element={<StudentHome />} />
+
+        <Route
+          path="*"
+          element={<Navigate to="/student" replace />}
+        />
+
       </Routes>
     </Layout>
   );
