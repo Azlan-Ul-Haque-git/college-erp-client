@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }) => {
       return data.user;
 
     } catch (err) {
-      console.log("LOGIN ERROR =>", err.response?.data || err.message);
+      console.log("LOGIN ERROR =>", err.response?.data || err.message);cd
       throw err;
     }
   }, []);
