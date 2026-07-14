@@ -46,7 +46,7 @@ export default function Register() {
     section: "A",
 
     // ✅ NEW
-    status: "regular",
+    studentStatus: "regular",
     backlogCount: 0,
 
     // faculty
@@ -76,7 +76,7 @@ export default function Register() {
 
       await api.post("/registrations", {
         ...form,
-        role
+        role,
       });
 
       toast.success("Registration submitted");
@@ -363,9 +363,9 @@ export default function Register() {
                   {/* ✅ NEW STATUS */}
 
                   <select
-                    value={form.status}
+                    value={form.studentStatus}
                     onChange={(e) =>
-                      set("status", e.target.value)
+                      set("studentStatus", e.target.value)
                     }
                     className="bg-white/10 border border-white/20 text-white rounded-xl px-4 py-2.5 text-sm focus:outline-none"
                   >
@@ -390,7 +390,7 @@ export default function Register() {
 
                   {/* ✅ BACKLOG COUNT */}
 
-                  {form.status === "backlog" && (
+                  {form.studentStatus === "backlog" && (
                     <input
                       type="number"
                       min="0"
