@@ -33,8 +33,8 @@ function StudentTimetable() {
   const [student, setStudent] = useState(null);
 
   useEffect(() => {
-    api.get("/students").then(r => {
-      const s = r.data.data?.find(s => s.email === user?.email);
+    api.get("/students/profile").then(r => {
+      const s = r.data.data;
       setStudent(s);
       if (s) {
         api.get(`/timetable?branch=${s.branch}&semester=${s.semester}`)

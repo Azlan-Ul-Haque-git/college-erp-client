@@ -14,7 +14,7 @@ import NotesUpload from "./NotesUpload";
 import FacultyAttendance from "./FacultyAttendance";
 import socket from "../../utils/socket";
 import Timetable from "./Timetable";
-import RegistrationRequests from "./ManageRegistrationRequests";
+import ManageRegistrationRequests from "./ManageRegistrationRequests";;
 import ManageNotices from "./ManageNotices";
 
 
@@ -257,7 +257,7 @@ export default function FacultyDashboard() {
 
         <Route path="attendance" element={<FacultyAttendance />} />
         <Route path="chat" element={<FacultyChat />} />
-        <Route path="registrations/*" element={<RegistrationRequests />} />
+        <Route path="registrations/*" element={<ManageRegistrationRequests />} />
         <Route path="assignments" element={<AssignmentManager />} />
         <Route path="leaves" element={<LeaveApplication />} />
         <Route path="notes" element={<NotesUpload />} />

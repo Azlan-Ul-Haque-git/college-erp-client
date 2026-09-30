@@ -13,7 +13,7 @@ export default function AssignmentManager() {
   const [submitting, setSubmitting] = useState(false);
 
   const fetch = async () => {
-    try { const { data } = await api.get("/assignments/my"); setAssignments(data.assignments || []); }
+    try { const { data } = await api.get("/assignments/faculty"); setAssignments(data.assignments || []); }
     catch { toast.error("Failed to load"); }
   };
 
@@ -40,7 +40,7 @@ export default function AssignmentManager() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">📝 Assignments</h1>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-white">📝 All Assignments</h1>
           <p className="text-slate-500 text-sm">{assignments.length} assignments created</p>
         </div>
         <motion.button whileTap={{ scale: 0.95 }} onClick={() => { setForm(EMPTY); setModal(true); }}
@@ -115,7 +115,7 @@ export default function AssignmentManager() {
                   <div>
                     <label className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1 block">Semester</label>
                     <select value={form.semester} onChange={e => setForm(p => ({ ...p, semester: +e.target.value }))} className="input">
-                      {[1,2,3,4,5,6,7,8].map(s => <option key={s} value={s}>Sem {s}</option>)}
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map(s => <option key={s} value={s}>Sem {s}</option>)}
                     </select>
                   </div>
                 </div>
