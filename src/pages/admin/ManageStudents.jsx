@@ -70,8 +70,8 @@ export default function ManageStudents() {
     setEditing(s._id);
 
     setForm({
-      name: s.user?.name || "",
-      email: s.user?.email || "",
+      name: s.name || "",
+      email: s.email || "",
       password: "",
       phone: s.phone || "",
 
@@ -373,7 +373,7 @@ export default function ManageStudents() {
                   { label: "Full Name", name: "name", type: "text", required: true },
                   { label: "Email", name: "email", type: "email", required: true },
                   { label: "Phone", name: "phone", type: "text" },
-                  { label: "Roll No", name: "rollNo", type: "text", required: true },
+                  { label: "Roll No", name: "rollNumber", type: "text", required: true },
                   { label: "Admission No", name: "admissionNo", type: "text" },
                   { label: "Parent Name", name: "parentName", type: "text" },
                   { label: "Parent Phone", name: "parentPhone", type: "text" },

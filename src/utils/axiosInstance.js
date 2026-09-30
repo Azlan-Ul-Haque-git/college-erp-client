@@ -1,7 +1,12 @@
 import axios from "axios";
 
+// ✅ Automatically picks local (dev) or production (Vercel) URL
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "https://college-erp-server-kvc4.onrender.com/api";
+
 const api = axios.create({
-  baseURL: "https://college-erp-server-kvc4.onrender.com/api",
+  baseURL: API_URL,
   withCredentials: true,
 });
 

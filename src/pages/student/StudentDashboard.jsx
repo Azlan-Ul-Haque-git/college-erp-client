@@ -105,20 +105,19 @@ function StudentNotices() {
   }, []);
 
   const filteredNotices = notices.filter((n) => {
-
-    if (
-      n.targetAudience !== "all" &&
-      n.targetAudience !== "students"
-    ) {
+    // 1. Role check — notice sabke liye, students ke liye, ya faculty ke liye
+    if (n.targetRole && n.targetRole !== "all" && n.targetRole !== "student") {
       return false;
     }
 
-    if (n.targetStudentStatus === "all") {
+    // 2. Student status check
+    // Agar "all" hai ya field missing hai → sab students ko dikhao
+    if (!n.targetStudentStatus || n.targetStudentStatus === "all") {
       return true;
     }
 
-    return n.targetStudentStatus === user?.status;
-
+    // 3. Specific status match karo (regular, backlog, ba, passout)
+    return n.targetStudentStatus === (user?.status || "regular");
   });
 
   const catColor = (audience) => {
@@ -354,17 +353,18 @@ function StudentChat() {
 }
 // ─── Student Home Page
 // ─────────────────────────────────────────────────────────────
+
 function StudentHome() {
   const { user } = useAuth();
   const studentProfile = user;
-  const [attendance, setAttendance] = useState([]);
+  const [attendanceSummary, setAttendanceSummary] = useState(null);
   const [marks, setMarks] = useState([]);
   const [fees, setFees] = useState(null);
   const [notices, setNotices] = useState([]);
 
   useEffect(() => {
-    api.get("/attendance/my-status")
-      .then(r => setAttendance(r.data.data ? [r.data.data] : []))
+    api.get("/attendance/my-summary")
+      .then(r => setAttendanceSummary(r.data.data || null))
       .catch(() => { });
 
     api.get("/marks/my-marks")
@@ -376,12 +376,30 @@ function StudentHome() {
       .catch(() => { });
 
     api.get("/notices")
-      .then(r => setNotices((r.data.notices || []).slice(0, 3)))
+      .then(r => {
+        const all = r.data.notices || [];
+        const filtered = all.filter((n) => {
+          if (n.targetRole && n.targetRole !== "all" && n.targetRole !== "student") {
+            return false;
+          }
+          if (!n.targetStudentStatus || n.targetStudentStatus === "all") {
+            return true;
+          }
+          return n.targetStudentStatus === (user?.status || "regular");
+        });
+        setNotices(filtered.slice(0, 3));
+      })
       .catch(() => { });
 
   }, []);
-  const presentCount = attendance.filter(a => a.status === "present").length;
-  const attendancePct = attendance.length > 0 ? Math.round(presentCount / attendance.length * 100) : 0;
+
+  const attendancePct = attendanceSummary?.percentage
+    ? Math.round(parseFloat(attendanceSummary.percentage))
+    : 0;
+
+  const presentCount = attendanceSummary?.present || 0;
+  const totalClasses = attendanceSummary?.total || 0;
+
   const cgpa = marks.length > 0
     ? (marks.reduce((a, m) => a + (m.total || 0) / 10, 0) / marks.length).toFixed(1)
     : "N/A";
@@ -394,6 +412,7 @@ function StudentHome() {
       { subject: "CN", score: 78 }, { subject: "SE", score: 82 },
     ];
 
+
   return (
     <div className="space-y-6">
       <div
@@ -401,7 +420,7 @@ function StudentHome() {
     rounded-2xl p-5 border
     ${studentProfile?.status === "backlog"
             ? "bg-red-50 border-red-200"
-            : studentProfile?.status === "ba_scheme"
+            : studentProfile?.status === "ba"
               ? "bg-yellow-50 border-yellow-200"
               : studentProfile?.status === "passout"
                 ? "bg-blue-50 border-blue-200"
@@ -422,7 +441,7 @@ function StudentHome() {
 
               {studentProfile?.status === "backlog"
                 ? "Backlog Student"
-                : studentProfile?.status === "ba_scheme"
+                : studentProfile?.status === "ba"
                   ? "BA Scheme Student"
                   : studentProfile?.status === "passout"
                     ? "Passout Student"
@@ -459,7 +478,14 @@ function StudentHome() {
       </motion.div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard title="Attendance" value={attendance.length > 0 ? `${attendancePct}%` : "N/A"} subtitle="Target: 75%" icon={ClipboardDocumentListIcon} color="from-violet-500 to-purple-600" delay={0} />
+        <StatCard
+          title="Attendance"
+          value={totalClasses > 0 ? `${attendancePct}%` : "N/A"}
+          subtitle={totalClasses > 0 ? `${presentCount}/${totalClasses} classes` : "Target: 75%"}
+          icon={ClipboardDocumentListIcon}
+          color="from-violet-500 to-purple-600"
+          delay={0}
+        />
         <StatCard title="CGPA" value={cgpa} subtitle="Current sem" icon={AcademicCapIcon} color="from-blue-500 to-cyan-600" delay={0.1} />
         <StatCard title="Fee Status" value={fees?.status || "N/A"} subtitle="This semester" icon={BanknotesIcon} color="from-emerald-500 to-teal-600" delay={0.2} />
         <StatCard title="Subjects" value={marks.length > 0 ? marks.length : "N/A"} subtitle="This semester" icon={ChartBarIcon} color="from-orange-500 to-amber-600" delay={0.3} />
@@ -494,26 +520,44 @@ function StudentHome() {
       </div>
 
       {/* Attendance summary */}
-      {attendance.length > 0 && (
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="card">
-          <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Attendance Summary</h3>
+      {totalClasses > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="card"
+        >
+          <h3 className="font-semibold text-slate-800 dark:text-white mb-4">
+            Attendance Summary
+          </h3>
           <div className="flex items-center gap-6">
             <div className="text-center">
-              <p className="text-3xl font-bold text-purple-600">{attendancePct}%</p>
+              <p className={`text-3xl font-bold ${attendancePct >= 75 ? "text-emerald-600" :
+                attendancePct >= 60 ? "text-yellow-600" : "text-red-500"
+                }`}>
+                {attendancePct}%
+              </p>
               <p className="text-xs text-slate-400 mt-1">Overall</p>
             </div>
             <div className="flex-1 bg-slate-100 dark:bg-slate-700 rounded-full h-4">
-              <div className="h-4 rounded-full bg-gradient-to-r from-purple-500 to-purple-600"
-                style={{ width: `${Math.min(attendancePct, 100)}%` }} />
+              <div
+                className={`h-4 rounded-full ${attendancePct >= 75 ? "bg-gradient-to-r from-emerald-500 to-emerald-600" :
+                  attendancePct >= 60 ? "bg-gradient-to-r from-yellow-500 to-yellow-600" :
+                    "bg-gradient-to-r from-red-500 to-red-600"
+                  }`}
+                style={{ width: `${Math.min(attendancePct, 100)}%` }}
+              />
             </div>
             <div className="text-right">
-              <p className="text-sm font-semibold dark:text-white">{presentCount}/{attendance.length}</p>
+              <p className="text-sm font-semibold dark:text-white">
+                {presentCount}/{totalClasses}
+              </p>
               <p className="text-xs text-slate-400">Classes</p>
             </div>
           </div>
           {attendancePct < 75 && (
             <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-xl text-sm text-red-600 dark:text-red-400">
-              ⚠️ Attendance is below 75% ! Come to college and attend classes.
+              ⚠️ Attendance is below 75%! Attend more classes.
             </div>
           )}
         </motion.div>
@@ -529,6 +573,7 @@ export default function StudentDashboard() {
       <Routes>
 
         <Route index element={<StudentHome />} />
+        <Route path="dashboard" element={<StudentHome />} />
 
         <Route path="attendance" element={<ViewAttendance />} />
         <Route path="mark-attendance" element={<StudentAttendance />} />

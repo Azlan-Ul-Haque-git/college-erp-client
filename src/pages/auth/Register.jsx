@@ -39,7 +39,7 @@ export default function Register() {
     phone: "",
 
     // student
-    rollNo: "",
+    rollNumber: "",
     branch: "CSE",
     semester: "1",
     year: "1",
@@ -311,8 +311,8 @@ export default function Register() {
                   <input
                     type="text"
                     placeholder="Roll No"
-                    value={form.rollNo}
-                    onChange={(e) => set("rollNo", e.target.value)}
+                    value={form.rollNumber}
+                    onChange={(e) => set("rollNumber", e.target.value)}
                     className="bg-white/10 border border-white/20 text-white placeholder-white/30 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-purple-400"
                   />
 
@@ -378,7 +378,7 @@ export default function Register() {
                       Backlog
                     </option>
 
-                    <option value="ba_scheme" className="text-black">
+                    <option value="ba" className="text-black">
                       BA Scheme
                     </option>
 

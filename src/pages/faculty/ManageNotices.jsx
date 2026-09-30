@@ -158,7 +158,7 @@ export default function ManageNotices() {
                         ? "All Students"
                         : n.targetStudentStatus === "backlog"
                           ? "Backlog Students"
-                          : n.targetStudentStatus === "ba_scheme"
+                          : n.targetStudentStatus === "ba"
                             ? "BA Scheme"
                             : n.targetStudentStatus === "passout"
                               ? "Passout"
@@ -383,7 +383,7 @@ export default function ManageNotices() {
                         Students With Backlogs
                       </option>
 
-                      <option value="ba_scheme">
+                      <option value="ba">
                         BA Scheme Students
                       </option>
 

@@ -12,7 +12,7 @@ export default function UploadMarks() {
   useEffect(() => {
     if (!form.branch || !form.year) return;
     api.get(`/students?branch=${form.branch}&year=${form.year}&section=${form.section}`)
-      .then(r => { setStudents(r.data.students||[]); setMarks({}); })
+      .then(r => { setStudents(r.data.data||[]); setMarks({}); })
       .catch(() => {});
   }, [form.branch, form.year, form.section]);
 
@@ -71,8 +71,8 @@ export default function UploadMarks() {
                 return (
                   <motion.tr key={s._id} initial={{opacity:0}} animate={{opacity:1}} transition={{delay:i*0.02}}
                     className="hover:bg-slate-50 dark:hover:bg-slate-700/30">
-                    <td className="px-4 py-3 text-slate-500">{s.rollNo}</td>
-                    <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">{s.user?.name}</td>
+                    <td className="px-4 py-3 text-slate-500">{s.rollNumber}</td>
+                    <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">{s.name}</td>
                     <td className="px-4 py-2 w-28">
                       <input type="number" min="0" max="30" value={marks[s._id]?.internal||""} onChange={e=>setMark(s._id,"internal",e.target.value)} className="input text-center" placeholder="0" />
                     </td>

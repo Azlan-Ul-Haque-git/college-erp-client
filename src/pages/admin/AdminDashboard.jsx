@@ -187,7 +187,7 @@ function AdminAttendance() {
 function AdminMarks() {
   const [students, setStudents] = useState([]);
   useEffect(() => {
-    api.get("/students").then(r => setStudents(r.data.students || [])).catch(() => { });
+    api.get("/students").then(r => setStudents(r.data.data || [])).catch(() => { });
   }, []);
 
   return (
@@ -214,8 +214,8 @@ function AdminMarks() {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                 {students.map((s, i) => (
                   <tr key={i} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
-                    <td className="px-4 py-3 font-medium dark:text-white">{s.user?.name}</td>
-                    <td className="px-4 py-3 text-slate-500">{s.rollNo}</td>
+                    <td className="px-4 py-3 font-medium dark:text-white">{s.name}</td>
+                    <td className="px-4 py-3 text-slate-500">{s.rollNumber}</td>
                     <td className="px-4 py-3 text-slate-500">{s.branch}</td>
                     <td className="px-4 py-3 text-slate-500">{s.year}</td>
                     <td className="px-4 py-3 text-slate-500">{s.semester}</td>

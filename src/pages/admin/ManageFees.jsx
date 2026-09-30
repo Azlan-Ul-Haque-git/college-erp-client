@@ -25,7 +25,7 @@ export default function ManageFees() {
 
   useEffect(() => {
     fetchFees();
-    api.get("/students").then(r => setStudents(r.data.students || [])).catch(() => { });
+    api.get("/students").then(r => setStudents(r.data.data || [])).catch(() => { });
   }, [fetchFees]);
 
   const totalCollected = fees.reduce((a, f) => a + (f.paidAmount || 0), 0);
@@ -114,8 +114,8 @@ export default function ManageFees() {
               ) : fees.map((f, i) => (
                 <motion.tr key={f._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}
                   className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition">
-                  <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">{f.student?.user?.name || "—"}</td>
-                  <td className="px-4 py-3 text-slate-500">{f.student?.rollNo || "—"}</td>
+                  <td className="px-4 py-3 font-medium text-slate-700 dark:text-slate-200">{f.student?.name || "—"}</td>
+                  <td className="px-4 py-3 text-slate-500">{f.student?.rollNumber || "—"}</td>
                   <td className="px-4 py-3 text-slate-700 dark:text-slate-300">₹{f.totalAmount?.toLocaleString()}</td>
                   <td className="px-4 py-3 text-emerald-600 font-semibold">₹{f.paidAmount?.toLocaleString()}</td>
                   <td className="px-4 py-3 text-red-500 font-semibold">₹{f.dueAmount?.toLocaleString()}</td>
@@ -161,7 +161,7 @@ export default function ManageFees() {
                   <select value={form.student} onChange={e => setForm(p => ({ ...p, student: e.target.value }))} required className="input">
                     <option value="">-- Select Student --</option>
                     {students.map(s => (
-                      <option key={s._id} value={s._id}>{s.user?.name} — {s.rollNo} ({s.branch})</option>
+                      <option key={s._id} value={s._id}>{s.name} — {s.rollNumber || "No Roll No"} ({s.branch || "No Branch"})</option>
                     ))}
                   </select>
                 </div>

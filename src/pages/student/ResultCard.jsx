@@ -11,13 +11,14 @@ export default function ResultCard() {
   const [student, setStudent] = useState(null);
 
   useEffect(() => {
-    api.get("/marks/my-marks").then(r => setMarks(r.data.marks || [])).catch(() => { });
-    api.get("/students").then(r => {
-      const s = r.data.students?.find(
-        s => s.user?._id === user?._id || s.user?.email === user?.email
-      );
-      setStudent(s);
-    }).catch(() => { });
+    api.get("/marks/my-marks")
+      .then(r => setMarks(r.data.marks || []))
+      .catch(() => { });
+
+    // Apni profile fetch karo — student apne aap ka data le sakta hai
+    api.get("/students/profile")
+      .then(r => setStudent(r.data.data))
+      .catch(() => { });
   }, []);
 
   const mock = [
@@ -83,7 +84,7 @@ export default function ResultCard() {
                         grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
             { label: "Student Name", value: user?.name },
-            { label: "Roll No", value: student?.rollNo || "N/A" },
+            { label: "Roll No", value: student?.rollNumber || "N/A" },
             { label: "Branch", value: student?.branch || "N/A" },
             { label: "Semester", value: student?.semester ? `Semester ${student.semester}` : "N/A" },
             { label: "Academic Year", value: "2024-25" },

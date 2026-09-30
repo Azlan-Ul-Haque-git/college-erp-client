@@ -149,10 +149,10 @@ export default function NotesUpload() {
                     onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
                     onDragLeave={() => setDragOver(false)}
                     className={`relative border-2 border-dashed rounded-xl p-6 text-center transition-all ${dragOver
-                        ? "border-purple-400 bg-purple-50 dark:bg-purple-900/20"
-                        : form.fileUrl
-                          ? "border-green-400 bg-green-50 dark:bg-green-900/20"
-                          : "border-slate-200 dark:border-slate-600 hover:border-purple-300"
+                      ? "border-purple-400 bg-purple-50 dark:bg-purple-900/20"
+                      : form.fileUrl
+                        ? "border-green-400 bg-green-50 dark:bg-green-900/20"
+                        : "border-slate-200 dark:border-slate-600 hover:border-purple-300"
                       }`}>
                     <input
                       type="file" id="noteFile" className="hidden"

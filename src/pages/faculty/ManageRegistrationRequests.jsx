@@ -87,7 +87,7 @@ export default function RegistrationRequests() {
                                         <p className="text-sm text-slate-500">{r.email} · {r.phone}</p>
                                         {r.role === "student" && (
                                             <p className="text-xs text-slate-400 mt-1">
-                                                {r.branch} · Sem {r.semester} · Year {r.year} · {r.rollNo}
+                                                {r.branch} · Sem {r.semester} · Year {r.year} · {r.rollNumber}
                                             </p>
                                         )}
                                         {r.role === "faculty" && (

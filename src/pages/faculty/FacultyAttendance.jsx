@@ -25,8 +25,8 @@ export default function FacultyAttendance() {
     try {
 
       const [s, r] = await Promise.all([
-        api.get("/api/attendance/my-status"),
-        api.get("/api/attendance")
+        api.get("/attendance/my-status"),
+        api.get("/attendance")
       ]);
 
       setToday(s.data.data || null);
@@ -76,7 +76,7 @@ export default function FacultyAttendance() {
           stream.getTracks().forEach(t => t.stop());
 
           const { data } =
-            await api.post("/api/attendance/checkin", {
+            await api.post("/attendance/checkin", {
               lat,
               lng,
               image
